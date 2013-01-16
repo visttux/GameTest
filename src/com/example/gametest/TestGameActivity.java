@@ -4,6 +4,7 @@ import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
 import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
 import org.andengine.engine.camera.hud.controls.BaseOnScreenControl;
+import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.physics.PhysicsHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
@@ -83,6 +84,8 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 	private Sprite mCar;
 	
 	private Vector2 mGravity;
+	
+	private AccelerationData mAccelerationData;
 
 	// ===========================================================
 	// Constructors
@@ -123,7 +126,7 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		this.mCarTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mCarTextureAtlas, this, "coche.png", 0, 0, 1, 1);
 		this.mCarTextureAtlas.load();
 		
-		/** Texturas Control Analogico */
+		/** Texturas Control Analogico (de momento no lo uso)*/
 		this.mOnScreenControlAtlas= new BitmapTextureAtlas(this.getTextureManager(), 256, 128, TextureOptions.BILINEAR);
 		this.mOnScreenControlBaseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlAtlas, this, "onscreen_control_base.png", 0, 0);
 		this.mOnScreenControlKnobTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlAtlas, this, "onscreen_control_knob.png", 128, 0);
@@ -149,7 +152,7 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		float centerXCar = (CAMERA_WIDTH - mCarTextureRegion.getWidth()) / 2;   
 		float centerYCar = (CAMERA_HEIGHT - mCarTextureRegion.getHeight()) / 2;
 		
-		float centerXScreenControl = (CAMERA_WIDTH - mOnScreenControlBaseTextureRegion.getWidth() * 1.75f) / 2;   
+		//float centerXScreenControl = (CAMERA_WIDTH - mOnScreenControlBaseTextureRegion.getWidth() * 1.75f) / 2; 
 		
 		this.addLimits();
 		
@@ -161,7 +164,7 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		
 		this.addCar(centerXCar, centerYCar);
 		
-		this.addAnalogScreenControl(centerXScreenControl, CAMERA_HEIGHT - mOnScreenControlBaseTextureRegion.getHeight());
+		//this.addAnalogScreenControl(centerXScreenControl, CAMERA_HEIGHT - mOnScreenControlBaseTextureRegion.getHeight());
 		//mOnScreenControlBaseTextureRegion.getHeight() - CAMERA_HEIGHT
 		
 		
@@ -170,7 +173,8 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 	}
 
 	
-
+	
+	/** No lo uso de momento */
 	@Override
 	public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent pSceneTouchEvent) {
 		/*if (this.mPhysicsWorld != null) {
@@ -188,23 +192,40 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		return false;
 	}
 
+	/** No lo uso de momento */
+	
 	@Override
 	public void onAccelerationAccuracyChanged(
 			final AccelerationData pAccelerationData) {
 
 	}
 
+	
 	@Override
 	public void onAccelerationChanged(final AccelerationData pAccelerationData) {
-		/*mGravity = Vector2Pool.obtain(pAccelerationData.getX(), pAccelerationData.getY());// no muevo en Y
+		
+		/*mGravity = Vector2Pool.obtain(pAccelerationData.getX() * 5, 0);// no muevo en Y
 		
 		this.mPhysicsWorld.setGravity(mGravity);
 		Vector2Pool.recycle(mGravity);*/
 		
+		/** Cuando cambia la aceleracion en el eje X movemos el sprite del coche con un impulso lineal */
+		
+		mAccelerationData = pAccelerationData;
+		
+		final Vector2 velocity = Vector2Pool.obtain(pAccelerationData.getX() * 2.5f, 0);
+		mCarBody.setLinearVelocity(velocity);
+		Vector2Pool.recycle(velocity);
+		
+		/*final float rotationInRad = (float) MathUtils.degToRad(pAccelerationData.getX()*5);
+		mCarBody.setTransform(mCarBody.getWorldCenter(), rotationInRad);
+		
+		mCar.setRotation(pAccelerationData.getX() * 5);*/
+		
 		
 		
 		}
-
+	
 	@Override
 	public void onResumeGame() {
 		super.onResumeGame();
@@ -245,6 +266,27 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		mCarBody = PhysicsFactory.createBoxBody(this.mPhysicsWorld, this.mCar, BodyType.DynamicBody, objectFixtureDef);
 		mCarBody.setLinearDamping(1.5f); //mas suavidad
 		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(mCar, mCarBody, true, false));
+		mCar.registerUpdateHandler(new IUpdateHandler() {
+
+			@Override
+			public void onUpdate(float pSecondsElapsed) {
+				
+				/** Rotamos el coche en proporcion a la velocidad de moviento en eje X <- -> 
+				 * 	Si roto Body da problemas con los limites de la pantalla y el sprite pasa */
+				
+				/*final float rotationInRad = (float) MathUtils.degToRad(mAccelerationData.getX()*5);
+				mCarBody.setTransform(mCarBody.getWorldCenter(), rotationInRad);*/
+				
+				mCar.setRotation(mAccelerationData.getX() * 5);
+				
+			}
+
+			@Override
+			public void reset() {
+				
+			}
+			
+		});
 		
 		
 		this.mScene.attachChild(mCar);
@@ -253,6 +295,7 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		
 	}
 	
+	/** No lo uso de momento */
 	private void addAnalogScreenControl(float pX, float pY) {
 		
 		final AnalogOnScreenControl analogOnScreenControl = new AnalogOnScreenControl(pX, pY, this.mCamera, this.mOnScreenControlBaseTextureRegion, 
