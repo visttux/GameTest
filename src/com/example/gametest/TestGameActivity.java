@@ -1,6 +1,7 @@
 package com.example.gametest;
 
 import org.andengine.engine.camera.Camera;
+import org.andengine.engine.camera.hud.HUD;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
@@ -13,6 +14,7 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
@@ -22,6 +24,8 @@ import org.andengine.extension.physics.box2d.util.Vector2Pool;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.font.Font;
+import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
@@ -31,8 +35,11 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.math.MathUtils;
 
+import android.graphics.Color;
+
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.MassData;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 
@@ -78,6 +85,11 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 	protected PhysicsWorld mPhysicsWorld;
 	private AccelerationData mAccelerationData;
 	
+	private HUD hud = new HUD();
+	private Font mFont;
+	
+	private int mFuelPoints = 100;
+	private Text mScoreText;
 
 	// ===========================================================
 	// Constructors
@@ -99,18 +111,24 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 				Toast.LENGTH_LONG).show(); */
 
 		mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-
 		return new EngineOptions(true, ScreenOrientation.PORTRAIT_FIXED	,
 				new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), mCamera);
 	}
 
 	@Override
 	public void onCreateResources() {
+		
+		/** Paths en assets de los distintos recursos (imagenes, sonido, texto) */
+		FontFactory.setAssetBasePath("font/");
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
-
+		
+		/** Fuente Fuel*/ 
+		this.mFont = FontFactory.createFromAsset(this.getFontManager(), this.getTextureManager(), 512, 512, TextureOptions.BILINEAR, this.getAssets(), "Plok.ttf", 32, true, Color.WHITE);
+		this.mFont.load();
+	
 		/** Texturas Carretera */
-		this.mRoadTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 406, 42, TextureOptions.BILINEAR);
-		this.mRoadTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mRoadTextureAtlas, this,"carretera-232px-bordes.png", 0, 0, 7, 1);
+		this.mRoadTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 800, 800, TextureOptions.BILINEAR);
+		this.mRoadTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mRoadTextureAtlas, this,"carretera-480-800.png", 0, 0, 2, 1);
 		this.mRoadTextureAtlas.load();
 		
 		/** Texturas Coche */
@@ -128,20 +146,19 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		this.mOnScreenControlBaseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlAtlas, this, "onscreen_control_base.png", 0, 0);
 		this.mOnScreenControlKnobTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlAtlas, this, "onscreen_control_knob.png", 128, 0);
 		this.mOnScreenControlAtlas.load();
-		
-		/** Texturas Acera 
-		this.mSidewalkTextureAtlas = new BitmapTextureAtlas(this.getTextureManager(), 56, 800, TextureOptions.BILINEAR);
-		this.mSidewalkTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mSidewalkTextureAtlas, this, "acera3.png", 0, 0);
-		this.mSidewalkTextureAtlas.load();*/
-		
 	}
 
 	@Override
 	public Scene onCreateScene() {
 		this.mEngine.registerUpdateHandler(new FPSLogger());
 
+		/** Añado el hud con el texto (Fuel: 100%) */
+		this.mScoreText = new Text(100, 0, this.mFont, "Fuel: 100%", "Fuel: XXX%".length(), this.getVertexBufferObjectManager());
+		hud.attachChild(this.mScoreText);
+		mCamera.setHUD(hud);
+		
 		this.mScene = new Scene();
-		this.mScene.setBackground(new Background(1,1,1));
+		this.mScene.setBackground(new Background(0,0,0));
 		//this.mScene.setOnSceneTouchListener(this);
 
 		this.mPhysicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false, 8, 1);
@@ -154,24 +171,24 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		
 		//this.addSideWalk(0,0);
 		this.addLimits();
-		this.addRoad(centerXRoad, centerYRoad);
-		this.addRoad(centerXRoad, centerYRoad - 42*4); //tamaño * escala
-		this.addRoad(centerXRoad, centerYRoad + 42*4);
-		this.addRoad(centerXRoad, centerYRoad + 2*(42*4));
-		this.addRoad(centerXRoad, centerYRoad - 2*(42*4)); //rellenamos toda la pantalla con carretera		
+		this.addRoad(centerXRoad, centerYRoad);	
 		this.addCar(centerXCar, centerYCar);
 		
 		//this.addAnalogScreenControl(centerXScreenControl, CAMERA_HEIGHT - mOnScreenControlBaseTextureRegion.getHeight());
 		//mOnScreenControlBaseTextureRegion.getHeight() - CAMERA_HEIGHT
 	
-		/** Cada segundo miramos si generamos o no un objeto fuel (1/4 posibilidades) */
+		/** Cada segundo miramos si generamos o no un objeto fuel (1/3 posibilidades) y restamos 1% del fuel acumulado*/
 		this.mScene.registerUpdateHandler(new TimerHandler(1f, true, new ITimerCallback() {
 			@Override
 			public void onTimePassed(TimerHandler pTimerHandler) {	
+				if(mFuelPoints > 0) {
+					mFuelPoints--;
+					mScoreText.setText("Fuel: " + mFuelPoints + "%");
+				}
 				final int random = MathUtils.random(0, 2);
 				if(random == 2) {
-					/** Añadimos el fuel en una posicion aleatoria X (<->) entre 16 y 400 */
-					addFuel( MathUtils.random(16,400));
+					/** Añadimos el fuel en una posicion aleatoria X (<->) entre 40 y 400 */
+					addFuel( MathUtils.random(40,400));
 				}							
 			}
 		}));
@@ -213,8 +230,7 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		final Vector2 velocity = Vector2Pool.obtain(pAccelerationData.getX() * 2.5f, 0);
 		mCarBody.setLinearVelocity(velocity);
 		Vector2Pool.recycle(velocity);
-		
-		}
+	}
 	
 	@Override
 	public void onResumeGame() {
@@ -234,24 +250,18 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 	
 	private void addRoad(float pX, float pY) {	
 		AnimatedSprite Road = new AnimatedSprite(pX, pY, mRoadTextureRegion, getVertexBufferObjectManager());
-		Road.setScale(4);
-		Road.animate(10); //dependera del coche (parado, mas tiempo corriendo)
+		Road.animate(60); //dependera del coche (parado, mas tiempo corriendo)
 		this.mScene.attachChild(Road);
 	}
 	
-	/*private void addSideWalk(float pX, float pY) {
-		final Sprite sidewalk = new Sprite(pX, pY, mSidewalkTextureRegion, getVertexBufferObjectManager());
-		this.mScene.attachChild(sidewalk);
-	}*/
-	
-	private void addCar(float pX, float pY) {
-		final FixtureDef objectFixtureDef = PhysicsFactory.createFixtureDef(1, 0.2f, 0.2f);
+	private void addCar(float pX, final float pY) {
+		final FixtureDef objectFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
 		
-		mCar = new Sprite(pX, pY, mCarTextureRegion, getVertexBufferObjectManager()); // 12 x 26 px
+		mCar = new Sprite(pX, pY, mCarTextureRegion, getVertexBufferObjectManager()) ; // 12 x 26 px
 		mCar.setScale(3);
-		mCarBody = PhysicsFactory.createBoxBody(this.mPhysicsWorld, this.mCar, BodyType.KinematicBody, objectFixtureDef);
+		mCarBody = PhysicsFactory.createBoxBody(this.mPhysicsWorld, this.mCar, BodyType.DynamicBody, objectFixtureDef);
 		mCarBody.setLinearDamping(1.5f); //mas suavidad
-		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(mCar, mCarBody, true, false));
+		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(mCar, mCarBody, true, true));
 		
 		mCar.registerUpdateHandler(new IUpdateHandler() {
 			@Override
@@ -264,7 +274,12 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 					mCar.setRotation(mAccelerationData.getX() * 5);
 				} else {
 					mCar.setRotation(0);
-				}				
+				}
+				
+				/** si al chocar se mueve el coche en altura lo devolvemos a la posicion inicial */
+				if(mCar.getY() != pY) {
+					mCar.setY(pY);
+				}
 			}
 			@Override
 			public void reset() {
@@ -275,17 +290,20 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		this.mScene.attachChild(mCar);	
 	}
 	
-	private void addFuel(int positionX) {
+	private void addFuel(final int positionX) {
 		final Vector2 velocity;
 		final Sprite fuel;
-		final FixtureDef objectFixtureDef = PhysicsFactory.createFixtureDef(1, 0.5f, 0.5f);
+		final FixtureDef objectFixtureDef = PhysicsFactory.createFixtureDef(0, 0f, 0f);
 		
 		fuel = new Sprite(positionX, 0, mFuelTextureRegion, getVertexBufferObjectManager());
 		velocity = Vector2Pool.obtain(0, 10);
 		fuel.setScale(1.5f);
 		
-		final Body body = PhysicsFactory.createBoxBody(this.mPhysicsWorld, fuel, BodyType.KinematicBody, objectFixtureDef);
-		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(fuel, body,true,false));
+		final Body body = PhysicsFactory.createBoxBody(this.mPhysicsWorld, fuel, BodyType.DynamicBody, objectFixtureDef);
+		/*MassData data = body.getMassData();
+		data.mass = 0f;
+		body.setMassData(data);*/
+		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(fuel,body,true,false));
 		body.setLinearVelocity(velocity);
 		Vector2Pool.recycle(velocity);
 		
@@ -296,8 +314,14 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 			}
 			@Override
 			public void onUpdate(float pSecondsElapsed) {
-				/** Miramos si colisiona con el coche para aumentar el combustible y hacerlo desaparecer */
-				if(fuel.collidesWith(mCar)) {
+				/** Miramos si colisiona con el coche (o choca y se mueve en X) para aumentar el combustible y hacerlo desaparecer */
+				if(fuel.collidesWith(mCar) ||  fuel.getX() != positionX) {
+					if(mFuelPoints < 95) {
+						mFuelPoints += 5;
+					} else {
+						mFuelPoints = 100;
+					}
+					mScoreText.setText("Fuel: " + mFuelPoints + "%");
 					body.setActive(false);
 					fuel.setVisible(false);
 					fuel.setIgnoreUpdate(true);
@@ -316,10 +340,10 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		final VertexBufferObjectManager vertexBufferObjectManager = this.getVertexBufferObjectManager();
 		//final Rectangle ground = new Rectangle(0, CAMERA_HEIGHT, CAMERA_WIDTH, 2, vertexBufferObjectManager);
 		//final Rectangle roof = new Rectangle(0, 0, CAMERA_WIDTH, 2,	vertexBufferObjectManager);
-		final Rectangle left = new Rectangle(0, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
-		final Rectangle right = new Rectangle(CAMERA_WIDTH, 0, 2, CAMERA_HEIGHT, vertexBufferObjectManager);
+		final Rectangle left = new Rectangle(40, 0, 1, CAMERA_HEIGHT, vertexBufferObjectManager);
+		final Rectangle right = new Rectangle(CAMERA_WIDTH - 40, 0, 1, CAMERA_HEIGHT, vertexBufferObjectManager);
 
-		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0.5f, 0.5f);
+		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0, 0);
 		//PhysicsFactory.createBoxBody(this.mPhysicsWorld, ground, BodyType.StaticBody, wallFixtureDef);
 		//PhysicsFactory.createBoxBody(this.mPhysicsWorld, roof, BodyType.StaticBody, wallFixtureDef);
 		PhysicsFactory.createBoxBody(this.mPhysicsWorld, left, BodyType.StaticBody, wallFixtureDef);
