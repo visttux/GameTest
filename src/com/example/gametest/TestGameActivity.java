@@ -9,7 +9,6 @@ import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.primitive.Rectangle;
-import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.sprite.AnimatedSprite;
@@ -23,13 +22,11 @@ import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.extension.physics.box2d.util.Vector2Pool;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
-import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
-import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.texture.region.ITiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
@@ -39,7 +36,6 @@ import android.graphics.Color;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.MassData;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 
@@ -52,7 +48,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
  */
 
 public class TestGameActivity extends SimpleBaseGameActivity implements
-		IAccelerationListener, IOnSceneTouchListener {
+		IAccelerationListener {
 	// ===========================================================
 	// Constants
 	// ===========================================================
@@ -66,7 +62,6 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 
 	private BitmapTextureAtlas mRoadTextureAtlas;
 	private BitmapTextureAtlas mCarTextureAtlas;
-	private BitmapTextureAtlas mOnScreenControlAtlas;
 	private BitmapTextureAtlas mFuelTextureAtlas;
 	
 	private Camera mCamera;
@@ -75,9 +70,6 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 	protected ITiledTextureRegion mRoadTextureRegion;
 	protected ITiledTextureRegion mCarTextureRegion;
 	protected ITiledTextureRegion mFuelTextureRegion;
-	protected ITextureRegion mSidewalkTextureRegion;
-	protected ITextureRegion mOnScreenControlBaseTextureRegion;
-	protected ITextureRegion mOnScreenControlKnobTextureRegion;
 	
 	private Sprite mCar;
 	private Body mCarBody;
@@ -141,11 +133,6 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		this.mFuelTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mFuelTextureAtlas, this, "fuel.png", 0, 0,1,1);
 		this.mFuelTextureAtlas.load();
 		
-		/** Texturas Control Analogico (de momento no lo uso)*/
-		this.mOnScreenControlAtlas= new BitmapTextureAtlas(this.getTextureManager(), 256, 128, TextureOptions.BILINEAR);
-		this.mOnScreenControlBaseTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlAtlas, this, "onscreen_control_base.png", 0, 0);
-		this.mOnScreenControlKnobTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(this.mOnScreenControlAtlas, this, "onscreen_control_knob.png", 128, 0);
-		this.mOnScreenControlAtlas.load();
 	}
 
 	@Override
@@ -159,7 +146,6 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		
 		this.mScene = new Scene();
 		this.mScene.setBackground(new Background(0,0,0));
-		//this.mScene.setOnSceneTouchListener(this);
 
 		this.mPhysicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false, 8, 1);
 		
@@ -167,16 +153,11 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		float centerYRoad = (CAMERA_HEIGHT - mRoadTextureRegion.getHeight()) / 2;
 		float centerXCar = (CAMERA_WIDTH - mCarTextureRegion.getWidth()) / 2;   
 		float centerYCar = (CAMERA_HEIGHT - mCarTextureRegion.getHeight()) / 2;
-		//float centerXScreenControl = (CAMERA_WIDTH - mOnScreenControlBaseTextureRegion.getWidth() * 1.75f) / 2; 
 		
-		//this.addSideWalk(0,0);
 		this.addLimits();
 		this.addRoad(centerXRoad, centerYRoad);	
 		this.addCar(centerXCar, centerYCar);
 		
-		//this.addAnalogScreenControl(centerXScreenControl, CAMERA_HEIGHT - mOnScreenControlBaseTextureRegion.getHeight());
-		//mOnScreenControlBaseTextureRegion.getHeight() - CAMERA_HEIGHT
-	
 		/** Cada segundo miramos si generamos o no un objeto fuel (1/3 posibilidades) y restamos 1% del fuel acumulado*/
 		this.mScene.registerUpdateHandler(new TimerHandler(1f, true, new ITimerCallback() {
 			@Override
@@ -197,21 +178,6 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		return this.mScene;
 	}
 
-	/** No lo uso de momento, por si tocamos pantalla (acelerar, etc) */
-	@Override
-	public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent pSceneTouchEvent) {
-		/*if (this.mPhysicsWorld != null) {
-			if (pSceneTouchEvent.isActionDown() ) {
-				mGravity.set(mGravity.x, -3f);
-				this.mPhysicsWorld.setGravity(mGravity);
-				Vector2Pool.recycle(mGravity);
-				Debug.d("touch");
-				return true;
-			}
-		}*/
-		return false;
-	}
-
 	/** No lo uso */
 	@Override
 	public void onAccelerationAccuracyChanged(final AccelerationData pAccelerationData) {
@@ -220,10 +186,6 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 
 	@Override
 	public void onAccelerationChanged(final AccelerationData pAccelerationData) {
-		/** Para usar las fisicas de la "gravedad" en todos los objetos */
-		/*mGravity = Vector2Pool.obtain(pAccelerationData.getX() * 5, 0);// no muevo en Y
-		this.mPhysicsWorld.setGravity(mGravity);
-		Vector2Pool.recycle(mGravity);*/
 		
 		/** Cuando cambia la aceleracion en el eje X movemos el "body" del coche con un impulso lineal */
 		mAccelerationData = pAccelerationData;
@@ -300,9 +262,6 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		fuel.setScale(1.5f);
 		
 		final Body body = PhysicsFactory.createBoxBody(this.mPhysicsWorld, fuel, BodyType.DynamicBody, objectFixtureDef);
-		/*MassData data = body.getMassData();
-		data.mass = 0f;
-		body.setMassData(data);*/
 		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(fuel,body,true,false));
 		body.setLinearVelocity(velocity);
 		Vector2Pool.recycle(velocity);
@@ -338,60 +297,15 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 	 *  Como el coche es kinematic (masa 0) no choca contra los lados */
 	private void addLimits() {
 		final VertexBufferObjectManager vertexBufferObjectManager = this.getVertexBufferObjectManager();
-		//final Rectangle ground = new Rectangle(0, CAMERA_HEIGHT, CAMERA_WIDTH, 2, vertexBufferObjectManager);
-		//final Rectangle roof = new Rectangle(0, 0, CAMERA_WIDTH, 2,	vertexBufferObjectManager);
 		final Rectangle left = new Rectangle(40, 0, 1, CAMERA_HEIGHT, vertexBufferObjectManager);
 		final Rectangle right = new Rectangle(CAMERA_WIDTH - 40, 0, 1, CAMERA_HEIGHT, vertexBufferObjectManager);
-
 		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0, 0);
-		//PhysicsFactory.createBoxBody(this.mPhysicsWorld, ground, BodyType.StaticBody, wallFixtureDef);
-		//PhysicsFactory.createBoxBody(this.mPhysicsWorld, roof, BodyType.StaticBody, wallFixtureDef);
 		PhysicsFactory.createBoxBody(this.mPhysicsWorld, left, BodyType.StaticBody, wallFixtureDef);
 		PhysicsFactory.createBoxBody(this.mPhysicsWorld, right, BodyType.StaticBody, wallFixtureDef);
-
-		//this.mScene.attachChild(ground);
-		//this.mScene.attachChild(roof);
 		this.mScene.attachChild(left);
 		this.mScene.attachChild(right);
 	}
 	
-	/** No planeo utilizar el control analogico */
-	/*private void addAnalogScreenControl(float pX, float pY) {
-		
-		final AnalogOnScreenControl analogOnScreenControl = new AnalogOnScreenControl(pX, pY, this.mCamera, this.mOnScreenControlBaseTextureRegion, 
-				this.mOnScreenControlKnobTextureRegion, 0.1f, this.getVertexBufferObjectManager(), new IAnalogOnScreenControlListener() {
-			
-					@Override
-					public void onControlChange(BaseOnScreenControl pBaseOnScreenControl, float pValueX, float pValueY) {
-						
-						final Body carBody = mCarBody;
-						final Vector2 velocity = Vector2Pool.obtain(pValueX*5, pValueY*5);
-						carBody.setLinearVelocity(velocity);
-						Vector2Pool.recycle(velocity);
-						
-						final float rotationInRad = (float) Math.atan2(pValueX, -pValueY);
-						carBody.setTransform(carBody.getWorldCenter(), rotationInRad);
-						
-						mCar.setRotation(MathUtils.radToDeg(rotationInRad));
-						
-					}
-					
-					@Override
-					public void onControlClick(AnalogOnScreenControl pAnalogOnScreenControl) {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-		
-		analogOnScreenControl.getControlBase().setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		analogOnScreenControl.getControlBase().setAlpha(0.5f);
-		analogOnScreenControl.getControlBase().setScaleCenter(0, 128);
-		analogOnScreenControl.getControlBase().setScale(1.75f);
-		analogOnScreenControl.getControlKnob().setScale(1.75f);
-		analogOnScreenControl.refreshControlKnobPosition();
-		
-		mScene.setChildScene(analogOnScreenControl);
-		} */
 	
 	// ===========================================================
 	// Inner and Anonymous Classes
