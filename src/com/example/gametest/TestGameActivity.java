@@ -1,5 +1,7 @@
 package com.example.gametest;
 
+import org.andengine.engine.Engine;
+import org.andengine.engine.LimitedFPSEngine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.hud.HUD;
 import org.andengine.engine.handler.IUpdateHandler;
@@ -33,9 +35,15 @@ import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.math.MathUtils;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 
@@ -58,8 +66,8 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 
 	// ===========================================================
 	// Fields
-	// ===========================================================
-
+	// ===========================================================	
+	
 	private BitmapTextureAtlas mRoadTextureAtlas;
 	private BitmapTextureAtlas mCarTextureAtlas;
 	private BitmapTextureAtlas mFuelTextureAtlas;
@@ -108,6 +116,12 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 	}
 
 	@Override
+	public Engine onCreateEngine(EngineOptions pEngineOptions) {
+		// frames por segundo
+		return new LimitedFPSEngine(pEngineOptions, 60);
+	}
+
+	@Override
 	public void onCreateResources() {
 		
 		/** Paths en assets de los distintos recursos (imagenes, sonido, texto) */
@@ -148,15 +162,16 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		this.mScene.setBackground(new Background(0,0,0));
 
 		this.mPhysicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false, 8, 1);
+		this.mPhysicsWorld.setContactListener(contactListener());
 		
 		float centerXRoad = (CAMERA_WIDTH - mRoadTextureRegion.getWidth()) / 2;   
 		float centerYRoad = (CAMERA_HEIGHT - mRoadTextureRegion.getHeight()) / 2;
 		float centerXCar = (CAMERA_WIDTH - mCarTextureRegion.getWidth()) / 2;   
-		float centerYCar = (CAMERA_HEIGHT - mCarTextureRegion.getHeight()) / 2;
+		//float centerYCar = (CAMERA_HEIGHT - mCarTextureRegion.getHeight()) / 2;
 		
-		this.addLimits();
+		this.addWalls();
 		this.addRoad(centerXRoad, centerYRoad);	
-		this.addCar(centerXCar, centerYCar);
+		this.addCar(centerXCar, 622);
 		
 		/** Cada segundo miramos si generamos o no un objeto fuel (1/3 posibilidades) y restamos 1% del fuel acumulado*/
 		this.mScene.registerUpdateHandler(new TimerHandler(1f, true, new ITimerCallback() {
@@ -210,6 +225,44 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 	// Methods
 	// ===========================================================
 	
+	private ContactListener contactListener() {
+		ContactListener contactListener = new ContactListener() {
+			@Override
+			public void preSolve(Contact contact, Manifold oldManifold) {
+				//NOTHING
+			}
+			
+			@Override
+			public void postSolve(Contact contact, ContactImpulse impulse) {	
+				//NOTHING
+			}
+			
+			@Override
+			public void endContact(Contact contact) {
+				//NOTHING
+			}
+			
+			@Override
+			public void beginContact(Contact contact) {
+				/** Cojemos la info de las 2 entidades en el contacto */
+				Fixture x1 = contact.getFixtureA();
+				Fixture x2 = contact.getFixtureB();
+				
+				if(x1.getBody().getUserData().equals("fuel") || x2.getBody().getUserData().equals("fuel"))
+				{
+					//Seteamos ese fuel para eliminar
+					Log.i("contacto", "fuel con otro objeto");
+					
+					if (x1.getBody().getUserData().equals("coche") || x2.getBody().getUserData().equals("coche"))
+					{
+						//sumamos puntos al contador
+					}
+				}
+			}
+		};
+		return contactListener;
+	}
+	
 	private void addRoad(float pX, float pY) {	
 		AnimatedSprite Road = new AnimatedSprite(pX, pY, mRoadTextureRegion, getVertexBufferObjectManager());
 		Road.animate(60); //dependera del coche (parado, mas tiempo corriendo)
@@ -223,6 +276,7 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		mCar.setScale(3);
 		mCarBody = PhysicsFactory.createBoxBody(this.mPhysicsWorld, this.mCar, BodyType.DynamicBody, objectFixtureDef);
 		mCarBody.setLinearDamping(1.5f); //mas suavidad
+		mCarBody.setUserData("coche");
 		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(mCar, mCarBody, true, true));
 		
 		mCar.registerUpdateHandler(new IUpdateHandler() {
@@ -262,18 +316,19 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 		fuel.setScale(1.5f);
 		
 		final Body body = PhysicsFactory.createBoxBody(this.mPhysicsWorld, fuel, BodyType.DynamicBody, objectFixtureDef);
+		body.setUserData("fuel");
 		this.mPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(fuel,body,true,false));
 		body.setLinearVelocity(velocity);
 		Vector2Pool.recycle(velocity);
 		
-		fuel.registerUpdateHandler(new IUpdateHandler() {
+		/*fuel.registerUpdateHandler(new IUpdateHandler() {
 			@Override
 			public void reset() {
-				/* NOTHING */
+				/* NOTHING 
 			}
 			@Override
 			public void onUpdate(float pSecondsElapsed) {
-				/** Miramos si colisiona con el coche (o choca y se mueve en X) para aumentar el combustible y hacerlo desaparecer */
+				/** Miramos si colisiona con el coche (o choca y se mueve en X) para aumentar el combustible y hacerlo desaparecer 
 				if(fuel.collidesWith(mCar) ||  fuel.getX() != positionX) {
 					if(mFuelPoints < 95) {
 						mFuelPoints += 5;
@@ -288,22 +343,28 @@ public class TestGameActivity extends SimpleBaseGameActivity implements
 					fuel.clearUpdateHandlers();
 				}
 			}
-		});
+		});*/
 		
 		this.mScene.attachChild(fuel);
 	}
 	
 	/** No ponemos suelo/techo para permitir salir los barriles/coches 
 	 *  Como el coche es kinematic (masa 0) no choca contra los lados */
-	private void addLimits() {
+	private void addWalls() {
 		final VertexBufferObjectManager vertexBufferObjectManager = this.getVertexBufferObjectManager();
 		final Rectangle left = new Rectangle(40, 0, 1, CAMERA_HEIGHT, vertexBufferObjectManager);
 		final Rectangle right = new Rectangle(CAMERA_WIDTH - 40, 0, 1, CAMERA_HEIGHT, vertexBufferObjectManager);
+		final Rectangle bottom = new Rectangle(0, CAMERA_HEIGHT, CAMERA_WIDTH, 1, vertexBufferObjectManager);
+		final Rectangle top = new Rectangle(0, -1, CAMERA_WIDTH, 1, vertexBufferObjectManager);
 		final FixtureDef wallFixtureDef = PhysicsFactory.createFixtureDef(0, 0, 0);
-		PhysicsFactory.createBoxBody(this.mPhysicsWorld, left, BodyType.StaticBody, wallFixtureDef);
-		PhysicsFactory.createBoxBody(this.mPhysicsWorld, right, BodyType.StaticBody, wallFixtureDef);
+		PhysicsFactory.createBoxBody(this.mPhysicsWorld, left, BodyType.StaticBody, wallFixtureDef).setUserData("muro");
+		PhysicsFactory.createBoxBody(this.mPhysicsWorld, right, BodyType.StaticBody, wallFixtureDef).setUserData("muro");
+		PhysicsFactory.createBoxBody(this.mPhysicsWorld, bottom, BodyType.StaticBody, wallFixtureDef).setUserData("muro");
+		PhysicsFactory.createBoxBody(this.mPhysicsWorld, top, BodyType.StaticBody, wallFixtureDef).setUserData("muro");
 		this.mScene.attachChild(left);
 		this.mScene.attachChild(right);
+		this.mScene.attachChild(bottom);
+		this.mScene.attachChild(top);
 	}
 	
 	
