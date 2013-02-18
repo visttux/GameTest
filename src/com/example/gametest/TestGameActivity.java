@@ -1,6 +1,5 @@
 package com.example.gametest;
 
-import java.util.Iterator;
 import java.util.Vector;
 
 import org.andengine.engine.Engine;
@@ -26,9 +25,8 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.math.MathUtils;
 
-import android.util.Log;
-
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
@@ -70,7 +68,8 @@ public class TestGameActivity extends SimpleBaseGameActivity {
 	private int mFuelPoints = 100;
 	private Text mScoreText;
 	
-	Vector<Fuel> fuelVector = new Vector<Fuel>();
+	Vector<Body> BodiesToRemove = new Vector<Body>();
+	Vector<Fuel> FuelToRemove = new Vector<Fuel>();
 
 	// ===========================================================
 	// Constructors
@@ -108,7 +107,7 @@ public class TestGameActivity extends SimpleBaseGameActivity {
 	public Scene onCreateScene() {
 		this.mEngine.registerUpdateHandler(new FPSLogger());
 
-		/** Añado el hud con el texto (Fuel: 100%) */
+		/** Aï¿½ado el hud con el texto (Fuel: 100%) */
 		this.mScoreText = new Text(100, 0, mResourcesManager.mFont, "Fuel: 100%", "Fuel: XXX%".length(), this.getVertexBufferObjectManager());
 		hud.attachChild(this.mScoreText);
 		mCamera.setHUD(hud);
@@ -138,9 +137,8 @@ public class TestGameActivity extends SimpleBaseGameActivity {
 				}
 				final int random = MathUtils.random(0, 2);
 				if(random == 2) {
-					/** Añadimos el fuel en una posicion aleatoria X (<->) entre 40 y 400 */
+					/** Aï¿½adimos el fuel en una posicion aleatoria X (<->) entre 40 y 400 */
 					final Fuel fuel = new Fuel(( MathUtils.random(40,400)), 10, mCamera, mPhysicsWorld);
-					fuelVector.add(fuel);
 					mScene.attachChild(fuel);
 				}							
 			}
@@ -192,22 +190,25 @@ public class TestGameActivity extends SimpleBaseGameActivity {
 				Fixture x1 = contact.getFixtureA();
 				Fixture x2 = contact.getFixtureB();
 				
-				if(x1.getBody().getUserData().equals("fuel") || x2.getBody().getUserData().equals("fuel"))
+				if(x2.getBody().getType2().equals("fuel"))
 				{
-					//Seteamos ese fuel para eliminar
-					Log.i("contacto", "fuel con otro objeto");
-
-					if (x1.getBody().getUserData().equals("coche") || x2.getBody().getUserData().equals("coche"))
-					{
-						//sumamos puntos al contador
-					}
+					final Fuel fuel = (Fuel) x2.getBody().getUserData();
+					fuel.setInvisible();
+					FuelToRemove.add(fuel);
+					BodiesToRemove.add(x2.getBody());
+				} else if (x1.getBody().getType2().equals("fuel")) 
+				{
+					final Fuel fuel = (Fuel) x1.getBody().getUserData();
+					fuel.setInvisible();
+					FuelToRemove.add(fuel);
+					BodiesToRemove.add(x1.getBody());
 				}
 			}
 		};
 		return contactListener;
 	}
 
-	/** Añado la carretera animada de "Background" */
+	/** Aï¿½ado la carretera animada de "Background" */
 	private void addRoad(float pX, float pY) {	
 		AnimatedSprite Road = new AnimatedSprite(pX, pY, ResourcesManager.getInstance().mRoadTextureRegion, ResourcesManager.getInstance().vbom);
 		Road.animate(60); //dependera del coche (parado, mas tiempo corriendo)
@@ -239,14 +240,17 @@ public class TestGameActivity extends SimpleBaseGameActivity {
 			public void onUpdate(float pSecondsElapsed) {
 
 				/** loop en todos los sprites a eliminar */
-				Iterator<Fuel> it = fuelVector.iterator();
-				while(it.hasNext()) {
-					final Fuel fuel = it.next();
-					 if(fuel.isToDelete()){
-						Log.i("todelete", "fuel");
-						mScene.detachChild(fuel);
-					}
+				for(int i=0;i<BodiesToRemove.size();i++) 
+				{
+					mPhysicsWorld.destroyBody(BodiesToRemove.get(i));
+					BodiesToRemove.remove(i);
 				}
+				for(int i=0;i<FuelToRemove.size();i++) 
+				{
+					mScene.detachChild(FuelToRemove.get(i));
+					FuelToRemove.remove(i);
+				}
+				
 			}
 
 			@Override

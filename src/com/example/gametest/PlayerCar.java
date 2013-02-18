@@ -36,7 +36,8 @@ public class PlayerCar extends Sprite implements IAccelerationListener {
 		final FixtureDef objectFixtureDef = PhysicsFactory.createFixtureDef(0,0,0);
 		mCarBody = PhysicsFactory.createBoxBody(physicsWorld, this, BodyType.DynamicBody, objectFixtureDef);
         mCarBody.setLinearDamping(1.5f); //mas suavidad
-        mCarBody.setUserData("coche");
+        mCarBody.setUserData(this);
+        mCarBody.setType2("playercar");
         physicsWorld.registerPhysicsConnector(new PhysicsConnector(this, mCarBody, true, true));
         registerUpdateHandler(new IUpdateHandler() {
                 @Override

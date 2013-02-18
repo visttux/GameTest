@@ -19,6 +19,7 @@ public class Fuel extends Sprite{
 	// ===========================================================
 	
 	private boolean mToDelete;
+	private Body mBody;
 	
 	// ===========================================================
 	// CONSTRUCTORS
@@ -30,11 +31,12 @@ public class Fuel extends Sprite{
 			
 			setScale(1.5f);
 			final FixtureDef objectFixtureDef = PhysicsFactory.createFixtureDef(0,0,0);
-			final Body body = PhysicsFactory.createBoxBody(physicsWorld, this, BodyType.DynamicBody, objectFixtureDef);
-	        body.setUserData("fuel");
-	        physicsWorld.registerPhysicsConnector(new PhysicsConnector(this, body, true, false));
+			mBody = PhysicsFactory.createBoxBody(physicsWorld, this, BodyType.DynamicBody, objectFixtureDef);
+	        mBody.setUserData(this);
+	        mBody.setType2("fuel");
+	        physicsWorld.registerPhysicsConnector(new PhysicsConnector(this, mBody, true, false));
 	        final Vector2 velocity = Vector2Pool.obtain(0, 10);
-	        body.setLinearVelocity(velocity);
+	        mBody.setLinearVelocity(velocity);
 	        Vector2Pool.recycle(velocity);
        	}
 	
@@ -48,7 +50,17 @@ public class Fuel extends Sprite{
 	
 	public void setToDelete(boolean ToDelete) {
 		this.mToDelete = ToDelete;
-	}	
+	}
+
+	public void setInvisible() {
+		mBody.setActive(false);
+		this.setVisible(false);
+		this.setIgnoreUpdate(true);
+		this.clearEntityModifiers();
+		this.clearUpdateHandlers();
+		this.detachSelf();
+	}
+	
 }
 
 	/*fuel.registerUpdateHandler(new IUpdateHandler() {
