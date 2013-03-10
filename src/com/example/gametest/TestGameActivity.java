@@ -11,21 +11,19 @@ import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
+import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
-import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.text.Text;
-import org.andengine.entity.util.FPSLogger;
-import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
-import org.andengine.ui.activity.SimpleBaseGameActivity;
-import org.andengine.util.math.MathUtils;
+import org.andengine.ui.activity.BaseGameActivity;
 
-import com.badlogic.gdx.math.Vector2;
+import android.view.KeyEvent;
+
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -42,7 +40,7 @@ import com.badlogic.gdx.physics.box2d.Manifold;
  * 
  */
 
-public class TestGameActivity extends SimpleBaseGameActivity {
+public class TestGameActivity extends BaseGameActivity {
 	// ===========================================================
 	// Constants
 	// ===========================================================
@@ -88,7 +86,11 @@ public class TestGameActivity extends SimpleBaseGameActivity {
 	@Override
 	public EngineOptions onCreateEngineOptions() {
 		mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-		return new EngineOptions(true, ScreenOrientation.PORTRAIT_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), mCamera);
+		EngineOptions engineOptions = new EngineOptions(true, ScreenOrientation.PORTRAIT_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), this.mCamera);
+	    engineOptions.getAudioOptions().setNeedsMusic(true).setNeedsSound(true);
+	    engineOptions.setWakeLockOptions(WakeLockOptions.SCREEN_ON);
+		
+	    return engineOptions; 
 	}
 
 	@Override
@@ -97,70 +99,102 @@ public class TestGameActivity extends SimpleBaseGameActivity {
 	}
 
 	@Override
-	public void onCreateResources() {
+	public void onCreateResources(OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
 		ResourcesManager.prepareManager(mEngine, this, mCamera, getVertexBufferObjectManager());
 		mResourcesManager = ResourcesManager.getInstance();
-		mResourcesManager.loadGameResources();
+//		mResourcesManager.loadGameResources();
+		pOnCreateResourcesCallback.onCreateResourcesFinished();
 	}
 
 	@Override
-	public Scene onCreateScene() {
-		this.mEngine.registerUpdateHandler(new FPSLogger());
+	public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
+//		this.mEngine.registerUpdateHandler(new FPSLogger());
+//
+//		/** A�ado el hud con el texto (Fuel: 100%) */
+//		this.mScoreText = new Text(100, 0, mResourcesManager.mFont, "Fuel: 100%", "Fuel: XXX%".length(), this.getVertexBufferObjectManager());
+//		hud.attachChild(this.mScoreText);
+//		mCamera.setHUD(hud);
+//		
+//		this.mScene = new Scene();
+//		this.mScene.setBackground(new Background(0,0,0));
+//
+//		this.mPhysicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false, 8, 1);
+//		this.mPhysicsWorld.setContactListener(contactListener());
+//		
+//		final float centerXRoad = (CAMERA_WIDTH - mResourcesManager.mRoadTextureRegion.getWidth()) / 2;   
+//		final float centerYRoad = (CAMERA_HEIGHT - mResourcesManager.mRoadTextureRegion.getHeight()) / 2;
+//		final float centerXCar = (CAMERA_WIDTH - mResourcesManager.mCarTextureRegion.getWidth()) / 2;
+//		
+//		this.addWalls();
+//		this.addRoad(centerXRoad, centerYRoad);	
+//		this.mCar = new PlayerCar(centerXCar, 620, mCamera, mPhysicsWorld);
+//		this.mScene.attachChild(mCar);
+//		
+//		/** Cada segundo miramos si generamos o no un objeto fuel (1/3 posibilidades) y restamos 1% del fuel acumulado*/
+//		this.mScene.registerUpdateHandler(new TimerHandler(1f, true, new ITimerCallback() {
+//			@Override
+//			public void onTimePassed(TimerHandler pTimerHandler) {	
+//				if(mFuelPoints > 0) {
+//					mFuelPoints--;
+//					mScoreText.setText("Fuel: " + mFuelPoints + "%");
+//				}
+//				final int random = MathUtils.random(0, 2);
+//				if(random == 2) {
+//					/** A�adimos el fuel en una posicion aleatoria X (<->) entre 40 y 400 */
+//					final Fuel fuel = new Fuel((MathUtils.random(50,400)), 10, mCamera, mPhysicsWorld);
+//					mScene.attachChild(fuel);
+//				}							
+//			}
+//		}));
+//		
+//		this.mScene.registerUpdateHandler(this.mPhysicsWorld);
+//		
+//		/** UpdateHandler para eliminar de forma segura los sprites y bodies */
+//		this.mScene.registerUpdateHandler(this.getCollisionUpdateHandler());
+		
+		SceneManager.getInstance().createSplashScene(pOnCreateSceneCallback);
+	}
+	
+	/**  Los siguientes dos overrides son para manejar bien los eventos de pulsar BACK y destruir la aplicacion*/
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK)
+	    {
+	        SceneManager.getInstance().getCurrentScene().onBackKeyPressed();
+	    }
+	    return false; 
+	}
+	
+	@Override
+	protected void onDestroy() {
+		System.exit(0);
+		super.onDestroy();
+	}
 
-		/** A�ado el hud con el texto (Fuel: 100%) */
-		this.mScoreText = new Text(100, 0, mResourcesManager.mFont, "Fuel: 100%", "Fuel: XXX%".length(), this.getVertexBufferObjectManager());
-		hud.attachChild(this.mScoreText);
-		mCamera.setHUD(hud);
-		
-		this.mScene = new Scene();
-		this.mScene.setBackground(new Background(0,0,0));
-
-		this.mPhysicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false, 8, 1);
-		this.mPhysicsWorld.setContactListener(contactListener());
-		
-		final float centerXRoad = (CAMERA_WIDTH - mResourcesManager.mRoadTextureRegion.getWidth()) / 2;   
-		final float centerYRoad = (CAMERA_HEIGHT - mResourcesManager.mRoadTextureRegion.getHeight()) / 2;
-		final float centerXCar = (CAMERA_WIDTH - mResourcesManager.mCarTextureRegion.getWidth()) / 2;
-		
-		this.addWalls();
-		this.addRoad(centerXRoad, centerYRoad);	
-		this.mCar = new PlayerCar(centerXCar, 620, mCamera, mPhysicsWorld);
-		this.mScene.attachChild(mCar);
-		
-		/** Cada segundo miramos si generamos o no un objeto fuel (1/3 posibilidades) y restamos 1% del fuel acumulado*/
-		this.mScene.registerUpdateHandler(new TimerHandler(1f, true, new ITimerCallback() {
+	@Override
+	public void onPopulateScene(Scene pScene,OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
+		mEngine.registerUpdateHandler(new TimerHandler(2f, new ITimerCallback() 
+		{
 			@Override
-			public void onTimePassed(TimerHandler pTimerHandler) {	
-				if(mFuelPoints > 0) {
-					mFuelPoints--;
-					mScoreText.setText("Fuel: " + mFuelPoints + "%");
-				}
-				final int random = MathUtils.random(0, 2);
-				if(random == 2) {
-					/** A�adimos el fuel en una posicion aleatoria X (<->) entre 40 y 400 */
-					final Fuel fuel = new Fuel(( MathUtils.random(40,400)), 10, mCamera, mPhysicsWorld);
-					mScene.attachChild(fuel);
-				}							
+			public void onTimePassed(TimerHandler pTimerHandler) {
+				mEngine.unregisterUpdateHandler(pTimerHandler);
+				SceneManager.getInstance().createMenuScene();
 			}
 		}));
-		
-		this.mScene.registerUpdateHandler(this.mPhysicsWorld);
-		
-		/** UpdateHandler para eliminar de forma segura los sprites y bodies */
-		this.mScene.registerUpdateHandler(this.getCollisionUpdateHandler());
-		return this.mScene;
+		/** Saltar al ciclo de la activity de nuevo*/
+		pOnPopulateSceneCallback.onPopulateSceneFinished();
 	}
 	
 	@Override
 	public void onResumeGame() {
 		super.onResumeGame();
-		this.enableAccelerationSensor(mCar);
+//		this.enableAccelerationSensor(mCar);
 	}
 
 	@Override
 	public void onPauseGame() {
 		super.onPauseGame();
-		this.disableAccelerationSensor();
+//		this.disableAccelerationSensor();
 	}
 
 	// ===========================================================
@@ -260,6 +294,7 @@ public class TestGameActivity extends SimpleBaseGameActivity {
 			}
         };
 	}
+
 	
 	
 	// ===========================================================
