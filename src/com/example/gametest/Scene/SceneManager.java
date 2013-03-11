@@ -1,7 +1,9 @@
-package com.example.gametest;
+package com.example.gametest.Scene;
 
 import org.andengine.engine.Engine;
 import org.andengine.ui.IGameInterface.OnCreateSceneCallback;
+
+import com.example.gametest.ResourcesManager;
 
 public class SceneManager
 {

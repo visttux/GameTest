@@ -1,13 +1,14 @@
-package com.example.gametest;
+package com.example.gametest.Scene;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.scene.Scene;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
-import com.example.gametest.SceneManager.SceneType;
-
 import android.app.Activity;
+
+import com.example.gametest.ResourcesManager;
+import com.example.gametest.Scene.SceneManager.SceneType;
 
 
 /** Clase abstracta que servira para diseñar las diferentes escenas controladas por SceneManager */

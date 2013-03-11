@@ -12,7 +12,6 @@ import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSourc
 import org.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureAtlasBuilder;
 import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder.TextureAtlasBuilderException;
 import org.andengine.opengl.texture.region.ITextureRegion;
-import org.andengine.opengl.texture.region.ITiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.BaseGameActivity;
 import org.andengine.util.debug.Debug;
@@ -36,16 +35,10 @@ public class ResourcesManager
     //---------------------------------------------
     // TEXTURES & TEXTURE REGIONS
     //---------------------------------------------
-    
-    private BitmapTextureAtlas mRoadTextureAtlas;
-	private BitmapTextureAtlas mCarTextureAtlas;
-	private BitmapTextureAtlas mFuelTextureAtlas;
+
 	private BitmapTextureAtlas splashTextureAtlas;
 	private BuildableBitmapTextureAtlas menuTextureAtlas;
 	
-	public ITiledTextureRegion mRoadTextureRegion;
-	public ITiledTextureRegion mCarTextureRegion;
-	public ITiledTextureRegion mFuelTextureRegion;
 	public ITextureRegion splash_region;
 	public ITextureRegion play_region;
 	public ITextureRegion options_region;
@@ -113,23 +106,7 @@ public class ResourcesManager
 
     private void loadGameGraphics()
     {
-    	/** Paths en assets de los distintos recursos (imagenes, sonido, texto) */
-		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
-		
-		/** Texturas Carretera */
-		this.mRoadTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 800, 800, TextureOptions.BILINEAR);
-		this.mRoadTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mRoadTextureAtlas, activity,"carretera-480-800.png", 0, 0, 2, 1);
-		this.mRoadTextureAtlas.load();
-		
-		/** Texturas Coche */
-		this.mCarTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 12, 26, TextureOptions.BILINEAR);
-		this.mCarTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mCarTextureAtlas, activity, "coche.png", 0, 0, 1, 1);
-		this.mCarTextureAtlas.load();
-		
-		/** Texturas Fuel */
-		this.mFuelTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 16, 22);
-		this.mFuelTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(this.mFuelTextureAtlas, activity, "fuel.png", 0, 0,1,1);
-		this.mFuelTextureAtlas.load();
+    	
     }
     
     private void loadGameFonts()

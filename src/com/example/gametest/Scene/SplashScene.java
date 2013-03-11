@@ -1,8 +1,9 @@
-package com.example.gametest;
+package com.example.gametest.Scene;
 
 import org.andengine.entity.sprite.Sprite;
 
-import com.example.gametest.SceneManager.SceneType;
+import com.example.gametest.Scene.SceneManager.SceneType;
+
 
 public class SplashScene extends BaseScene {
 
