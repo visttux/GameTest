@@ -124,12 +124,13 @@ public class SceneManager
     	setScene(mMenuScene);    	
     }
 
-    public void loadGameScene(final Engine mEngine)
+    public void createGameScene(final Engine mEngine)
     {
-    	//cargar texturas del juego si hace falta
         ResourcesManager.getInstance().loadGameResources();
         mGameScene = new GameScene();
         setScene(mGameScene);
+        mGameScene.activity.onResumeGame();
+        
     }
     
     

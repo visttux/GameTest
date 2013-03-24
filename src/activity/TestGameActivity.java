@@ -15,9 +15,9 @@ import org.andengine.ui.activity.BaseGameActivity;
 
 import resources.ResourcesManager;
 import scene.SceneManager;
-
-
+import scene.SceneManager.SceneType;
 import android.view.KeyEvent;
+import entity.Canon;
 
 /**
  * (c) 2013 Victor Martinez
@@ -38,10 +38,10 @@ public class TestGameActivity extends BaseGameActivity {
 	// Fields
 	// ===========================================================	
 	
+	private Canon mCanon;
 	
 	private Camera mCamera;	
 	protected PhysicsWorld mPhysicsWorld;
-
 
 	// ===========================================================
 	// Constructors
@@ -75,14 +75,11 @@ public class TestGameActivity extends BaseGameActivity {
 	@Override
 	public void onCreateResources(OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
 		ResourcesManager.prepareManager(mEngine, this, mCamera, getVertexBufferObjectManager());
-//		ResourcesManager.getInstance().loadGameResources();
 		pOnCreateResourcesCallback.onCreateResourcesFinished();
 	}
 
 	@Override
 	public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
-
-		
 		SceneManager.getInstance().createSplashScene(pOnCreateSceneCallback);
 	}
 	
@@ -118,20 +115,27 @@ public class TestGameActivity extends BaseGameActivity {
 	
 	@Override
 	public void onResumeGame() {
+		
 		super.onResumeGame();
-//		this.enableAccelerationSensor(mCar);
+		if(SceneManager.getInstance().getCurrentSceneType().equals(SceneType.SCENE_GAME))
+			this.enableAccelerationSensor(mCanon)  ;
+		
 	}
 
 	@Override
 	public void onPauseGame() {
 		super.onPauseGame();
-//		this.disableAccelerationSensor();
+		this.disableAccelerationSensor();
 	}
 
 	// ===========================================================
 	// Methods
 	// ===========================================================
 	
+	public void setCanon(Canon pCanon)
+	{
+		mCanon = pCanon;
+	}
 	
 	
 	// ===========================================================

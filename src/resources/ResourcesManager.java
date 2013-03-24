@@ -14,7 +14,6 @@ import org.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureAtla
 import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder.TextureAtlasBuilderException;
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
-import org.andengine.ui.activity.BaseGameActivity;
 import org.andengine.util.debug.Debug;
 
 import activity.TestGameActivity;
@@ -30,7 +29,7 @@ public class ResourcesManager
     private static final ResourcesManager INSTANCE = new ResourcesManager();
     
     public Engine engine;
-    public BaseGameActivity activity;
+    public TestGameActivity activity;
     public Camera camera;
     public VertexBufferObjectManager vbom;
    
@@ -39,12 +38,21 @@ public class ResourcesManager
     //---------------------------------------------
 
 	private BitmapTextureAtlas splashTextureAtlas;
+	private BitmapTextureAtlas gameBackgroundTexturaAtlas;
+	private BitmapTextureAtlas gameCoinsTextureAtlas;
 	private BuildableBitmapTextureAtlas menuTextureAtlas;
 	
+	/** menu */
 	public ITextureRegion splash_region;
 	public ITextureRegion play_region;
 	public ITextureRegion options_region;
 	public ITextureRegion menu_background_region;
+	
+	/** game */
+	public ITextureRegion game_background_region;
+	public ITextureRegion game_coin1_region;
+	public ITextureRegion game_coin5_region;
+	public ITextureRegion game_canon_region;
 	
 	public Font mFont;
 	
@@ -108,6 +116,18 @@ public class ResourcesManager
 
     private void loadGameGraphics()
     {
+    	BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
+    	
+    	/** Texturas de los background */
+    	gameBackgroundTexturaAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 480, 800, TextureOptions.BILINEAR);
+    	game_background_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameBackgroundTexturaAtlas, activity, "background/background1.png", 0, 0);
+    	gameBackgroundTexturaAtlas.load();
+    	
+    	gameCoinsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 144, 144, TextureOptions.BILINEAR);
+    	game_coin1_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin1_48px.png", 0, 0);
+    	game_coin5_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin5_48px.png", 48, 48);
+    	game_canon_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "canon.png", 96, 96);
+    	gameCoinsTextureAtlas.load();
     	
     }
     

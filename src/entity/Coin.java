@@ -5,10 +5,20 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 public class Coin extends CellEntity {
 
+	private int mType; 
+	
 	public Coin(int pCellX, int pCellY, int pWidth, int pHeight,
-			ITextureRegion pTextureRegion, VertexBufferObjectManager pVertexBufferObjectManager) {
+			ITextureRegion pTextureRegion, VertexBufferObjectManager pVertexBufferObjectManager, int pType) {
 		
 		super(pCellX, pCellY, pWidth, pHeight, pTextureRegion, pVertexBufferObjectManager);
+		mType = pType;
+		
 	}
+	
+	public int getType()
+	{
+		return mType;
+	}
+	
 
 }

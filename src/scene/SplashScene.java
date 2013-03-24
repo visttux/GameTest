@@ -12,11 +12,11 @@ public class SplashScene extends BaseScene {
 	
 	@Override
 	public void createScene() {
-		mSplash = new Sprite(0, 0, resourcesManager.splash_region, vbom);
+		mSplash = new Sprite(130, 240, resourcesManager.splash_region, vbom);
 		
 		/** lo colocamos en medio de la pantalla */
 		mSplash.setScale(1.5f);
-		mSplash.setPosition(130, 240);
+		//mSplash.setPosition(130, 240);
 		attachChild(mSplash);
 	}
 

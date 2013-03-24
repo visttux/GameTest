@@ -8,8 +8,7 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import resources.ResourcesManager;
 import scene.SceneManager.SceneType;
-
-import android.app.Activity;
+import activity.TestGameActivity;
 
 
 
@@ -21,7 +20,7 @@ public abstract class BaseScene extends Scene
     //---------------------------------------------
     
     protected Engine engine;
-    protected Activity activity;
+    protected TestGameActivity activity;
     protected ResourcesManager resourcesManager;
     protected VertexBufferObjectManager vbom;
     protected Camera camera;
