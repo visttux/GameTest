@@ -120,6 +120,7 @@ public class GameScene extends BaseScene {
 	{
 		Sprite SpriteforBackground =  new Sprite(0, 0, resourcesManager.game_background_region, vbom);
 		SpriteforBackground.setAlpha(0.5f);
+		SpriteforBackground.setRotation(180);
 		SpriteBackground background = new SpriteBackground(SpriteforBackground);
 		setBackground(background);
 	}
