@@ -1,6 +1,8 @@
 package scene;
 
 import org.andengine.engine.camera.hud.HUD;
+import org.andengine.engine.handler.timer.ITimerCallback;
+import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.Sprite;
@@ -22,24 +24,17 @@ public class GameScene extends BaseScene {
 
 	private static final int COL_ROWS = 10;
 	private HUD mHud;
-	/** Posicion de los Coins en la grid*/
-	private int[][] CoinMatrix = {  { 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } , 
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } ,
-									{ 0,0,0,0,0,0,0,0,0,0,0,0,0 } };
+	
+	/** Posicion de la ultima moneda en cada columna */
+	private int[] lastCoin;
+		
 	/** Referencias a los Coins */
 	private Coin[][] CoinReferencesMatrix;
+	
 	private PhysicsWorld mPhysicsWorld;
 	private Canon mCanon;
+	private Coin lastAlphaCoin;
+	
 	
 	@Override
 	public void createScene() {
@@ -50,6 +45,19 @@ public class GameScene extends BaseScene {
 		mPhysicsWorld =  new FixedStepPhysicsWorld(30, new Vector2(0,0), false, 8, 1);
 		createWalls();
 		createCanon();
+		//primera moneda donde aparece el cañon
+		lastAlphaCoin = CoinReferencesMatrix[5][4];
+		registerUpdateHandler(new TimerHandler(0.1f, true, new ITimerCallback() {
+			@Override
+			public void onTimePassed(final TimerHandler pTimerHandler) {
+				lastAlphaCoin.setAlpha(0.5f);
+				lastAlphaCoin = CoinReferencesMatrix[(int) (mCanon.getX() / 46)][lastCoin[(int) (mCanon.getX() / 46)]];
+				lastAlphaCoin.setAlpha(1.0f);
+			}
+
+		}));
+		
+		
 		registerUpdateHandler(this.mPhysicsWorld);
 	}
 
@@ -88,6 +96,10 @@ public class GameScene extends BaseScene {
 				}
 			}
 		}
+		
+		lastCoin = new int[COL_ROWS];
+		for(int i=0; i<COL_ROWS; i++)
+			lastCoin[i] = 4;		
 	}
 	
 	private void createCanon()
@@ -120,7 +132,7 @@ public class GameScene extends BaseScene {
 	{
 		Sprite SpriteforBackground =  new Sprite(0, 0, resourcesManager.game_background_region, vbom);
 		SpriteforBackground.setAlpha(0.5f);
-		SpriteforBackground.setRotation(180);
+		//SpriteforBackground.setRotation(180);
 		SpriteBackground background = new SpriteBackground(SpriteforBackground);
 		setBackground(background);
 	}

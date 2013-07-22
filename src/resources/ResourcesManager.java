@@ -123,7 +123,7 @@ public class ResourcesManager
     	game_background_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameBackgroundTexturaAtlas, activity, "background/background1.png", 0, 0);
     	gameBackgroundTexturaAtlas.load();
     	
-    	gameCoinsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 144, 144, TextureOptions.BILINEAR);
+    	gameCoinsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 152, 152, TextureOptions.BILINEAR);
     	game_coin1_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin1_48px.png", 0, 0);
     	game_coin5_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin5_48px.png", 48, 48);
     	game_canon_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "canon.png", 96, 96);

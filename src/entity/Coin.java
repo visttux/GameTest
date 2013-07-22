@@ -12,6 +12,7 @@ public class Coin extends CellEntity {
 		
 		super(pCellX, pCellY, pWidth, pHeight, pTextureRegion, pVertexBufferObjectManager);
 		mType = pType;
+		setAlpha(0.5f);
 		
 	}
 	
