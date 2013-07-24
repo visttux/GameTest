@@ -117,8 +117,8 @@ public class TestGameActivity extends BaseGameActivity {
 	public void onResumeGame() {
 		
 		super.onResumeGame();
-		if(SceneManager.getInstance().getCurrentSceneType().equals(SceneType.SCENE_GAME))
-			this.enableAccelerationSensor(mCanon)  ;
+		//if(SceneManager.getInstance().getCurrentSceneType().equals(SceneType.SCENE_GAME))
+			//this.enableAccelerationSensor(mCanon)  ;
 		
 	}
 

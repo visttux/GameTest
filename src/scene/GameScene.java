@@ -1,10 +1,10 @@
 package scene;
 
 import org.andengine.engine.camera.hud.HUD;
-import org.andengine.engine.handler.timer.ITimerCallback;
-import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.background.SpriteBackground;
+import org.andengine.entity.sprite.ButtonSprite;
+import org.andengine.entity.sprite.ButtonSprite.OnClickListener;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
@@ -20,7 +20,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import entity.Canon;
 import entity.Coin;
 
-public class GameScene extends BaseScene {
+public class GameScene extends BaseScene implements OnClickListener{
 
 	private static final int COL_ROWS = 10;
 	private HUD mHud;
@@ -33,7 +33,8 @@ public class GameScene extends BaseScene {
 	
 	private PhysicsWorld mPhysicsWorld;
 	private Canon mCanon;
-	private Coin lastAlphaCoin;
+	//private Coin lastAlphaCoin;
+	//private CellEntity mPointer;
 	
 	
 	@Override
@@ -41,13 +42,15 @@ public class GameScene extends BaseScene {
 		createBackground();
 		createHud();
 		initializeReferencesMatrix();
-		createCoins();
 		mPhysicsWorld =  new FixedStepPhysicsWorld(30, new Vector2(0,0), false, 8, 1);
-		createWalls();
 		createCanon();
+		createCoins();
+		createWalls();
+		createButtons();
 		//primera moneda donde aparece el cañon
-		lastAlphaCoin = CoinReferencesMatrix[5][4];
-		registerUpdateHandler(new TimerHandler(0.1f, true, new ITimerCallback() {
+		
+		//lastAlphaCoin = CoinReferencesMatrix[5][4];
+		/*registerUpdateHandler(new TimerHandler(0.1f, true, new ITimerCallback() {
 			@Override
 			public void onTimePassed(final TimerHandler pTimerHandler) {
 				lastAlphaCoin.setAlpha(0.5f);
@@ -55,7 +58,7 @@ public class GameScene extends BaseScene {
 				lastAlphaCoin.setAlpha(1.0f);
 			}
 
-		}));
+		}));*/
 		
 		
 		registerUpdateHandler(this.mPhysicsWorld);
@@ -104,12 +107,12 @@ public class GameScene extends BaseScene {
 	
 	private void createCanon()
 	{
-		mCanon = new Canon(5, 16, 48, 48, resourcesManager.game_canon_region, vbom, mPhysicsWorld);
+		mCanon = new Canon(5, 0, 48, 800, resourcesManager.game_canon_region, vbom, mPhysicsWorld);
 		attachChild(mCanon);
 		activity.setCanon(mCanon);
 	}
-
-
+		
+	
 	@Override
 	public void onBackKeyPressed() {
 		/** Aqui en realidad sacaremos un pop-up (como un pause) y desde ahi podras volver al menu */
@@ -159,5 +162,41 @@ public class GameScene extends BaseScene {
 		this.attachChild(right);
 	}
 	
+	private void createButtons() {
+		HUD hud = new HUD();
+		
+		ButtonSprite rightbutton = new ButtonSprite(380, 400, resourcesManager.game_triangle_button_region, vbom,new OnClickListener() {
+			
+			@Override
+			public void onClick(ButtonSprite pButtonSprite, float pTouchAreaLocalX,	float pTouchAreaLocalY) {
+				mCanon.moveRight();
+				
+			}
+		});
+		
+		ButtonSprite leftbutton = new ButtonSprite(20, 400, resourcesManager.game_triangle_button_region, vbom,new OnClickListener() {
+			
+			@Override
+			public void onClick(ButtonSprite pButtonSprite, float pTouchAreaLocalX,	float pTouchAreaLocalY) {
+				mCanon.moveLeft();
+				
+			}
+		});
+		
+		leftbutton.setRotation(180);
+		hud.attachChild(rightbutton);
+		hud.attachChild(leftbutton);
+		hud.registerTouchArea(rightbutton);
+		hud.registerTouchArea(leftbutton);
+		hud.setTouchAreaBindingOnActionDownEnabled(true);
+		camera.setHUD(hud);
 
+}
+
+	@Override
+	public void onClick(ButtonSprite pButtonSprite, float pTouchAreaLocalX,
+			float pTouchAreaLocalY) {
+		// TODO Auto-generated method stub
+		
+	}
 }
