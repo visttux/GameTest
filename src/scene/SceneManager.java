@@ -2,6 +2,7 @@ package scene;
 
 
 import org.andengine.engine.Engine;
+import org.andengine.input.touch.detector.SurfaceGestureDetectorAdapter;
 import org.andengine.ui.IGameInterface.OnCreateSceneCallback;
 
 import resources.ResourcesManager;
@@ -15,7 +16,7 @@ public class SceneManager
     
     private BaseScene mSplashScene;
     private BaseScene mMenuScene;
-    private BaseScene mGameScene;
+    public BaseScene mGameScene;
     private BaseScene mLoadingScene;
     
     //---------------------------------------------
@@ -130,10 +131,7 @@ public class SceneManager
         mGameScene = new GameScene();
         setScene(mGameScene);
         mGameScene.activity.onResumeGame();
-        
     }
-    
-    
-    
+       
     
 }

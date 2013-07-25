@@ -6,6 +6,7 @@ import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.ButtonSprite;
 import org.andengine.entity.sprite.ButtonSprite.OnClickListener;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 
 import entity.Canon;
+import entity.CellEntity;
 import entity.Coin;
 
 public class GameScene extends BaseScene implements OnClickListener{
@@ -33,12 +35,18 @@ public class GameScene extends BaseScene implements OnClickListener{
 	
 	private PhysicsWorld mPhysicsWorld;
 	private Canon mCanon;
+	private int lastType;
+	private Text mCoinNumberText;
+	private int mCoinNumber;
 	//private Coin lastAlphaCoin;
 	//private CellEntity mPointer;
 	
 	
 	@Override
-	public void createScene() {
+	public void createScene() {	
+		
+		mCoinNumber = 0;
+		lastType = 0;
 		createBackground();
 		createHud();
 		initializeReferencesMatrix();
@@ -46,7 +54,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 		createCanon();
 		createCoins();
 		createWalls();
-		createButtons();
+		//createButtons();
 		//primera moneda donde aparece el cañon
 		
 		//lastAlphaCoin = CoinReferencesMatrix[5][4];
@@ -110,6 +118,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 		mCanon = new Canon(5, 0, 48, 800, resourcesManager.game_canon_region, vbom, mPhysicsWorld);
 		attachChild(mCanon);
 		activity.setCanon(mCanon);
+		
 	}
 		
 	
@@ -128,14 +137,13 @@ public class GameScene extends BaseScene implements OnClickListener{
 	@Override
 	public void disposeScene() {
 		camera.setHUD(null);
-		camera.setCenter(240, 400);
+		camera.setCenter(240, 400);	
 	}
 	
 	private void createBackground() //poner background en el parser XML o pasarle como argumento
 	{
 		Sprite SpriteforBackground =  new Sprite(0, 0, resourcesManager.game_background_region, vbom);
 		SpriteforBackground.setAlpha(0.5f);
-		//SpriteforBackground.setRotation(180);
 		SpriteBackground background = new SpriteBackground(SpriteforBackground);
 		setBackground(background);
 	}
@@ -146,6 +154,15 @@ public class GameScene extends BaseScene implements OnClickListener{
 		camera.setHUD(mHud);
 		
 		//aÃ±adir texto etc
+		CellEntity square = new CellEntity(1,14,48,48,resourcesManager.game_hud_square_region,vbom) {};
+		this.attachChild(square);
+		
+		mCoinNumberText = new Text(55, 630, resourcesManager.mFont, "0", "XXX".length() , vbom);
+		mCoinNumberText.setScale(0.85f);
+		mHud.attachChild(this.mCoinNumberText);
+		
+		
+		
 	}
 	
 	private void createWalls()
@@ -163,14 +180,12 @@ public class GameScene extends BaseScene implements OnClickListener{
 	}
 	
 	private void createButtons() {
-		HUD hud = new HUD();
 		
 		ButtonSprite rightbutton = new ButtonSprite(380, 400, resourcesManager.game_triangle_button_region, vbom,new OnClickListener() {
 			
 			@Override
 			public void onClick(ButtonSprite pButtonSprite, float pTouchAreaLocalX,	float pTouchAreaLocalY) {
 				mCanon.moveRight();
-				
 			}
 		});
 		
@@ -179,17 +194,15 @@ public class GameScene extends BaseScene implements OnClickListener{
 			@Override
 			public void onClick(ButtonSprite pButtonSprite, float pTouchAreaLocalX,	float pTouchAreaLocalY) {
 				mCanon.moveLeft();
-				
 			}
 		});
 		
 		leftbutton.setRotation(180);
-		hud.attachChild(rightbutton);
-		hud.attachChild(leftbutton);
-		hud.registerTouchArea(rightbutton);
-		hud.registerTouchArea(leftbutton);
-		hud.setTouchAreaBindingOnActionDownEnabled(true);
-		camera.setHUD(hud);
+		mHud.attachChild(rightbutton);
+		mHud.attachChild(leftbutton);
+		mHud.registerTouchArea(rightbutton);
+		mHud.registerTouchArea(leftbutton);
+		mHud.setTouchAreaBindingOnActionDownEnabled(true);
 
 }
 
@@ -199,4 +212,55 @@ public class GameScene extends BaseScene implements OnClickListener{
 		// TODO Auto-generated method stub
 		
 	}
+	
+
+
+	public void pickCoins()
+    {	
+    	
+    	/** posicion de la ultima moneda en la columna */
+    	int X = (int) (mCanon.getX() / 46);
+    	int Y = lastCoin[X];
+    	Coin last = CoinReferencesMatrix[X][Y];
+    	
+    	if(lastType == last.getType() || lastType == 0)
+    	{
+	    	/** cojemos todas las referencias de monedas del mismo tipo por encima */
+	    	if(mCoinNumber < 5)
+	    	{
+	    		lastType = last.getType();
+		    	do 
+		    	{
+			    	if(Y == 0)
+			    	{
+			    		last = CoinReferencesMatrix[X][Y];
+			    		last.goDown();
+			    		break;
+			    	} else {
+			    		last = CoinReferencesMatrix[X][Y]; 
+			    		last.goDown();
+				    	Y--;
+				    	lastCoin[X] = Y;
+			    	}
+			    	
+			    	mCoinNumber++;
+			    	mCoinNumberText.setText("" + mCoinNumber);
+		    	} while(last.getType() == CoinReferencesMatrix[X][Y].getType() && Y>=0 && mCoinNumber < 5);
+	    	}
+    	}
+    	
+    	/** cambiamos el icono del tipo picked*/
+    	switch (lastType) {
+		case 1:
+			attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin1_region,vbom) {});
+			break;
+		case 5:
+			attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin5_region,vbom) {});
+			break;
+		default:
+			break;
+		}
+    }
+
+	
 }

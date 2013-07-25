@@ -58,6 +58,7 @@ public class ResourcesManager
 	public ITextureRegion game_canon_region;
 	public ITextureRegion game_pointer_region;
 	public ITextureRegion game_triangle_button_region;
+	public ITextureRegion game_hud_square_region;
 	
 	public Font mFont;
 	
@@ -134,6 +135,8 @@ public class ResourcesManager
     	
     	game_coin1_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin1_48px.png", 0, 0);
     	game_coin5_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin5_48px.png", 48, 48);
+    	game_hud_square_region =  BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "hud_square_48px.png", 96, 96);
+    	
     	game_canon_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCanonTextureAtlas, activity, "canon2.png", 0, 0);
     	game_triangle_button_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameButtonsTextureAtlas, activity, "triangle_button_64px.png", 0, 0);
     	
