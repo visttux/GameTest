@@ -77,7 +77,7 @@ public class TestGameActivity extends BaseGameActivity {
 		surfaceGestureDetector = new SurfaceGestureDetectorAdapter(this) {
 			@Override
 			protected boolean onSwipeUp() {
-				// TODO Auto-generated method stub
+				((GameScene) SceneManager.getInstance().mGameScene).throwCoins();
 				return false;
 			}
 			

@@ -151,7 +151,7 @@ public class ResourcesManager
     	FontFactory.setAssetBasePath("font/");
         
     	/** Fuente Fuel*/ 
-		this.mFont = FontFactory.createFromAsset(activity.getFontManager(), activity.getTextureManager(), 512, 512, TextureOptions.BILINEAR, activity.getAssets(), "Plok.ttf", 32, true, Color.WHITE);
+		this.mFont = FontFactory.createFromAsset(activity.getFontManager(), activity.getTextureManager(), 512, 512, TextureOptions.BILINEAR, activity.getAssets(), "00.ttf", 32, true, Color.WHITE);
 		this.mFont.load();
     }
     

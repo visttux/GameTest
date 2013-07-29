@@ -10,6 +10,7 @@ import org.andengine.entity.text.Text;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
+import org.andengine.opengl.texture.region.ITextureRegion;
 
 import scene.SceneManager.SceneType;
 import utils.Constants;
@@ -35,8 +36,13 @@ public class GameScene extends BaseScene implements OnClickListener{
 	
 	private PhysicsWorld mPhysicsWorld;
 	private Canon mCanon;
+	
+	/** tipo de la ultima moneda cojida*/
 	private int lastType;
+	
 	private Text mCoinNumberText;
+	
+	/** numero de monedas cojidas */
 	private int mCoinNumber;
 	//private Coin lastAlphaCoin;
 	//private CellEntity mPointer;
@@ -73,7 +79,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 	}
 
 	private void initializeReferencesMatrix() {
-		CoinReferencesMatrix = new Coin[COL_ROWS][COL_ROWS];
+		CoinReferencesMatrix = new Coin[COL_ROWS][16];
 	}
 
 	/** Ahora a manubrio pero habra que parsearlo de un XML */
@@ -157,8 +163,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 		CellEntity square = new CellEntity(1,14,48,48,resourcesManager.game_hud_square_region,vbom) {};
 		this.attachChild(square);
 		
-		mCoinNumberText = new Text(55, 630, resourcesManager.mFont, "0", "XXX".length() , vbom);
-		mCoinNumberText.setScale(0.85f);
+		mCoinNumberText = new Text(60, 630, resourcesManager.mFont, "0", "XXX".length() , vbom);
 		mHud.attachChild(this.mCoinNumberText);
 		
 		
@@ -215,52 +220,95 @@ public class GameScene extends BaseScene implements OnClickListener{
 	
 
 
+	/** metodo que se encarga de cojer monedas y mostrarlo en la interfaz*/
 	public void pickCoins()
     {	
     	
     	/** posicion de la ultima moneda en la columna */
-    	int X = (int) (mCanon.getX() / 46);
+		//int X = mCanon.getCellX();
+		int X = (int) (mCanon.getX() / 46);
     	int Y = lastCoin[X];
-    	Coin last = CoinReferencesMatrix[X][Y];
     	
-    	if(lastType == last.getType() || lastType == 0)
+    	if(Y >= 0)
     	{
-	    	/** cojemos todas las referencias de monedas del mismo tipo por encima */
-	    	if(mCoinNumber < 5)
+	    	Coin last = CoinReferencesMatrix[X][Y];
+	    	
+	    	if(lastType == last.getType() || lastType == 0)
 	    	{
-	    		lastType = last.getType();
-		    	do 
+		    	/** cojemos todas las referencias de monedas del mismo tipo por encima */
+		    	if(mCoinNumber < 9)
 		    	{
-			    	if(Y == 0)
+		    		lastType = last.getType();
+			    	do 
 			    	{
-			    		last = CoinReferencesMatrix[X][Y];
-			    		last.goDown();
-			    		break;
-			    	} else {
-			    		last = CoinReferencesMatrix[X][Y]; 
-			    		last.goDown();
-				    	Y--;
-				    	lastCoin[X] = Y;
-			    	}
-			    	
-			    	mCoinNumber++;
-			    	mCoinNumberText.setText("" + mCoinNumber);
-		    	} while(last.getType() == CoinReferencesMatrix[X][Y].getType() && Y>=0 && mCoinNumber < 5);
+				    	last = CoinReferencesMatrix[X][Y];
+				    	last.goDown();
+					    Y--;
+					    lastCoin[X] = Y;
+	
+				    	mCoinNumber++;
+				    	mCoinNumberText.setText("" + mCoinNumber);
+			    	} while(Y>=0 && mCoinNumber < 9 && last.getType() == CoinReferencesMatrix[X][Y].getType() );
+		    	}
 	    	}
+	    	
+	    	/** cambiamos el icono del tipo picked*/
+	    	switch (lastType) {
+			case 1:
+				attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin1_region,vbom) {});
+				break;
+			case 5:
+				attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin5_region,vbom) {});
+				break;
+			default:
+				break;
+			}
     	}
     	
-    	/** cambiamos el icono del tipo picked*/
-    	switch (lastType) {
-		case 1:
-			attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin1_region,vbom) {});
-			break;
-		case 5:
-			attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin5_region,vbom) {});
-			break;
-		default:
-			break;
-		}
-    }
+	}
 
+	public void throwCoins()
+	{
+		
+		if(lastType > 0)
+		{
+			//int x = mCanon.getCellX();
+			int x = (int) (mCanon.getX() / 46);
+			int y = 16;
+			ITextureRegion CoinTexture = null;
+			
+			
+			switch (lastType)
+			{
+			case 1:
+				CoinTexture = resourcesManager.game_coin1_region;
+				break;
+			case 5:
+				CoinTexture = resourcesManager.game_coin5_region;
+			default:
+				break;
+			}
+			
+			
+			/** creamos un sprite por cada moneda */
+			for(int i=0;i<mCoinNumber;i++)
+			{
+			    Coin auxCoin = new Coin(x, y-1, 48, 48, CoinTexture, vbom, lastType);
+				this.attachChild(auxCoin);
+				
+				/** movemos la moneda hasta la ultima posicion en Y */
+				auxCoin.goUp(lastCoin[x]);
+				/** actualizamos la matriz de monedas */
+				lastCoin[x] = lastCoin[x]+1;
+				CoinReferencesMatrix[x][lastCoin[x]] = auxCoin;
+			}
+			
+			mCoinNumber = 0;
+			mCoinNumberText.setText("" + mCoinNumber);
+			lastType = 0;
+		}
+	}
+	
+	
 	
 }

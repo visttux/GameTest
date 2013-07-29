@@ -26,10 +26,10 @@ public class Canon extends CellEntity implements IAccelerationListener{
 		super(pCellX, pCellY, pWidth, pHeight, pTextureRegion, pVertexBufferObjectManager);
 		mCellX = pCellX;
 		mCellY = pCellY;
-		/*FixtureDef fixtureDef = PhysicsFactory.createFixtureDef(0, 0, 0);
+		FixtureDef fixtureDef = PhysicsFactory.createFixtureDef(0, 0, 0);
 		mCanonBody = PhysicsFactory.createBoxBody(pPhysicsWorld, this, BodyType.DynamicBody, fixtureDef);
 		mCanonBody.setLinearDamping(1.5f);
-		pPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(this, mCanonBody, true, false));*/
+		pPhysicsWorld.registerPhysicsConnector(new PhysicsConnector(this, mCanonBody, true, false));
 	}
 	
 	public void moveLeft()
@@ -59,9 +59,9 @@ public class Canon extends CellEntity implements IAccelerationListener{
 
 	@Override
 	public void onAccelerationChanged(AccelerationData pAccelerationData) {
-		/*final Vector2 velocity = Vector2Pool.obtain(pAccelerationData.getX() * 2.0f , 0);
+		final Vector2 velocity = Vector2Pool.obtain(pAccelerationData.getX() * 2.0f , 0);
 		mCanonBody.setLinearVelocity(velocity);
-		Vector2Pool.recycle(velocity);*/
+		Vector2Pool.recycle(velocity);
 		
 	}
 

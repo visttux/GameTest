@@ -2,7 +2,6 @@ package scene;
 
 
 import org.andengine.engine.Engine;
-import org.andengine.input.touch.detector.SurfaceGestureDetectorAdapter;
 import org.andengine.ui.IGameInterface.OnCreateSceneCallback;
 
 import resources.ResourcesManager;
