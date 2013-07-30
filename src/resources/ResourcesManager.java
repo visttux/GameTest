@@ -55,6 +55,7 @@ public class ResourcesManager
 	public ITextureRegion game_background_region;
 	public ITextureRegion game_coin1_region;
 	public ITextureRegion game_coin5_region;
+	public ITextureRegion game_coin10_region;
 	public ITextureRegion game_canon_region;
 	public ITextureRegion game_pointer_region;
 	public ITextureRegion game_triangle_button_region;
@@ -129,15 +130,16 @@ public class ResourcesManager
     	game_background_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameBackgroundTexturaAtlas, activity, "background/background1.png", 0, 0);
     	gameBackgroundTexturaAtlas.load();
     	
-    	gameCoinsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 144, 144, TextureOptions.BILINEAR);
+    	gameCoinsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 192, 192, TextureOptions.BILINEAR);
     	gameCanonTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 48, 800, TextureOptions.BILINEAR);
     	gameButtonsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 64, 64, TextureOptions.BILINEAR);
     	
-    	game_coin1_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin1_48px.png", 0, 0);
+    	game_coin1_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin1_48px2.png", 0, 0);
     	game_coin5_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin5_48px.png", 48, 48);
-    	game_hud_square_region =  BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "hud_square_48px.png", 96, 96);
+    	game_coin10_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin10_48px.png", 96, 96);
+    	game_hud_square_region =  BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "hud_square_48px.png", 144, 144);
     	
-    	game_canon_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCanonTextureAtlas, activity, "canon2.png", 0, 0);
+    	game_canon_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCanonTextureAtlas, activity, "canon3.png", 0, 0);
     	game_triangle_button_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameButtonsTextureAtlas, activity, "triangle_button_64px.png", 0, 0);
     	
     	gameCoinsTextureAtlas.load();

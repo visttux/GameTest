@@ -1,6 +1,8 @@
 package scene;
 
 import org.andengine.engine.camera.hud.HUD;
+import org.andengine.engine.handler.timer.ITimerCallback;
+import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.ButtonSprite;
@@ -79,7 +81,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 	}
 
 	private void initializeReferencesMatrix() {
-		CoinReferencesMatrix = new Coin[COL_ROWS][16];
+		CoinReferencesMatrix = new Coin[Constants.CELLS_HORIZONTAL][Constants.CELLS_VERTICAL];
 	}
 
 	/** Ahora a manubrio pero habra que parsearlo de un XML */
@@ -114,8 +116,8 @@ public class GameScene extends BaseScene implements OnClickListener{
 			}
 		}
 		
-		lastCoin = new int[COL_ROWS];
-		for(int i=0; i<COL_ROWS; i++)
+		lastCoin = new int[Constants.CELLS_HORIZONTAL];
+		for(int i=0; i<Constants.CELLS_HORIZONTAL; i++)
 			lastCoin[i] = 4;		
 	}
 	
@@ -236,7 +238,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 	    	if(lastType == last.getType() || lastType == 0)
 	    	{
 		    	/** cojemos todas las referencias de monedas del mismo tipo por encima */
-		    	if(mCoinNumber < 9)
+		    	if(mCoinNumber < Constants.MAX_COINS)
 		    	{
 		    		lastType = last.getType();
 			    	do 
@@ -248,17 +250,20 @@ public class GameScene extends BaseScene implements OnClickListener{
 	
 				    	mCoinNumber++;
 				    	mCoinNumberText.setText("" + mCoinNumber);
-			    	} while(Y>=0 && mCoinNumber < 9 && last.getType() == CoinReferencesMatrix[X][Y].getType() );
+			    	} while(Y>=0 && mCoinNumber < Constants.MAX_COINS && last.getType() == CoinReferencesMatrix[X][Y].getType() );
 		    	}
 	    	}
 	    	
 	    	/** cambiamos el icono del tipo picked*/
 	    	switch (lastType) {
-			case 1:
+			case Constants.Coin1:
 				attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin1_region,vbom) {});
 				break;
-			case 5:
+			case Constants.Coin5:
 				attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin5_region,vbom) {});
+				break;
+			case Constants.Coin10:
+				attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin10_region,vbom) {});
 				break;
 			default:
 				break;
@@ -273,18 +278,22 @@ public class GameScene extends BaseScene implements OnClickListener{
 		if(lastType > 0)
 		{
 			//int x = mCanon.getCellX();
-			int x = (int) (mCanon.getX() / 46);
+			final int x = (int) (mCanon.getX() / 46);
 			int y = 16;
 			ITextureRegion CoinTexture = null;
 			
 			
 			switch (lastType)
 			{
-			case 1:
+			case Constants.Coin1:
 				CoinTexture = resourcesManager.game_coin1_region;
 				break;
-			case 5:
+			case Constants.Coin5:
 				CoinTexture = resourcesManager.game_coin5_region;
+				break;
+			case Constants.Coin10:
+				CoinTexture = resourcesManager.game_coin10_region;
+				break;
 			default:
 				break;
 			}
@@ -306,9 +315,76 @@ public class GameScene extends BaseScene implements OnClickListener{
 			mCoinNumber = 0;
 			mCoinNumberText.setText("" + mCoinNumber);
 			lastType = 0;
+		
+			/** miramos si hay algun combo en la columna */
+			registerUpdateHandler(new TimerHandler(0.35f, new ITimerCallback() {
+				@Override
+				public void onTimePassed(final TimerHandler pTimerHandler) {
+					checkCombos(x);					
+				}
+			}));
+			
+			
 		}
 	}
 	
-	
+	public void checkCombos(final int x)
+	{
+		int y = lastCoin[x];
+		boolean recall = false;
+		
+		/** comprobamos si hay 5 monedas de 1 y si es asi creamos una de 5 y borramos las ultimas */
+		if( lastCoin[x] >= 4 && CoinReferencesMatrix[x][y].getType() == Constants.Coin1 && CoinReferencesMatrix[x][y-1].getType() == Constants.Coin1 
+				&& CoinReferencesMatrix[x][y-2].getType() == Constants.Coin1 && CoinReferencesMatrix[x][y-3].getType() == Constants.Coin1 && CoinReferencesMatrix[x][y-4].getType() == Constants.Coin1  )
+		{
+			
+			/** borramos las monedas */
+			CoinReferencesMatrix[x][y].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-1].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-2].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-3].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-4].setAlpha(0.0f);
+			
+			/** creamos la nueva moneda */
+			CoinReferencesMatrix[x][y-4] = new Coin(x, y-4, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+			attachChild(CoinReferencesMatrix[x][y-4]);
+			
+			/** actualizamos las matrices */
+			CoinReferencesMatrix[x][y] = null;
+			CoinReferencesMatrix[x][y-1] = null;
+			CoinReferencesMatrix[x][y-2] = null;
+			CoinReferencesMatrix[x][y-3] = null;
+			lastCoin[x] = lastCoin[x] - 4;
+			
+			recall = true;
+		} else if (lastCoin[x] >= 1 && CoinReferencesMatrix[x][y].getType() == Constants.Coin5 && CoinReferencesMatrix[x][y-1].getType() == Constants.Coin5  ) {
+			/** borramos las monedas */
+			CoinReferencesMatrix[x][y].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-1].setAlpha(0.0f);
+			
+			/** creamos la nueva moneda */
+			CoinReferencesMatrix[x][y-1] = new Coin(x, y-1, 48, 48, resourcesManager.game_coin10_region, vbom, Constants.Coin10);
+			attachChild(CoinReferencesMatrix[x][y-1]);
+			
+			/** actualizamos las matrices */
+			CoinReferencesMatrix[x][y] = null;
+			lastCoin[x] = lastCoin[x] - 1;
+			
+			recall = true;
+		}
+				
+		if(recall)
+		{
+			/** miramos si hay algun combo en la columna */
+			registerUpdateHandler(new TimerHandler(0.25f, new ITimerCallback() {
+				@Override
+				public void onTimePassed(final TimerHandler pTimerHandler) {
+					checkCombos(x);					
+				}
+			}));
+		}
+		
+		
+	}
 	
 }
