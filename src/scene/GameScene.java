@@ -116,9 +116,15 @@ public class GameScene extends BaseScene implements OnClickListener{
 			}
 		}
 		
+		/** creamos una de 10 para cuadrar numeros hasta 100*/
+		CoinReferencesMatrix[5][5] = new Coin(5, 5, 48, 48, resourcesManager.game_coin10_region, vbom, Constants.Coin10);	
+		attachChild(CoinReferencesMatrix[5][5]);
+		
 		lastCoin = new int[Constants.CELLS_HORIZONTAL];
 		for(int i=0; i<Constants.CELLS_HORIZONTAL; i++)
-			lastCoin[i] = 4;		
+			lastCoin[i] = 4;
+		lastCoin[5] = 5;
+		
 	}
 	
 	private void createCanon()
@@ -265,6 +271,12 @@ public class GameScene extends BaseScene implements OnClickListener{
 			case Constants.Coin10:
 				attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin10_region,vbom) {});
 				break;
+			case Constants.Coin50:
+				attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin50_region,vbom) {});
+				break;
+			case Constants.Coin100:
+				attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin100_region,vbom) {});
+				break;
 			default:
 				break;
 			}
@@ -293,6 +305,12 @@ public class GameScene extends BaseScene implements OnClickListener{
 				break;
 			case Constants.Coin10:
 				CoinTexture = resourcesManager.game_coin10_region;
+				break;
+			case Constants.Coin50:
+				CoinTexture = resourcesManager.game_coin50_region;
+				break;
+			case Constants.Coin100:
+				CoinTexture = resourcesManager.game_coin100_region;
 				break;
 			default:
 				break;
@@ -364,6 +382,42 @@ public class GameScene extends BaseScene implements OnClickListener{
 			
 			/** creamos la nueva moneda */
 			CoinReferencesMatrix[x][y-1] = new Coin(x, y-1, 48, 48, resourcesManager.game_coin10_region, vbom, Constants.Coin10);
+			attachChild(CoinReferencesMatrix[x][y-1]);
+			
+			/** actualizamos las matrices */
+			CoinReferencesMatrix[x][y] = null;
+			lastCoin[x] = lastCoin[x] - 1;
+			
+			recall = true;
+		} else if (lastCoin[x] >= 4 && CoinReferencesMatrix[x][y].getType() == Constants.Coin10 && CoinReferencesMatrix[x][y-1].getType() == Constants.Coin10 
+				&& CoinReferencesMatrix[x][y-2].getType() == Constants.Coin10 && CoinReferencesMatrix[x][y-3].getType() == Constants.Coin10 && CoinReferencesMatrix[x][y-4].getType() == Constants.Coin10  ){
+				
+			/** borramos las monedas */
+			CoinReferencesMatrix[x][y].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-1].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-2].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-3].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-4].setAlpha(0.0f);
+			
+			/** creamos la nueva moneda */
+			CoinReferencesMatrix[x][y-4] = new Coin(x, y-4, 48, 48, resourcesManager.game_coin50_region, vbom, Constants.Coin50);
+			attachChild(CoinReferencesMatrix[x][y-4]);
+			
+			/** actualizamos las matrices */
+			CoinReferencesMatrix[x][y] = null;
+			CoinReferencesMatrix[x][y-1] = null;
+			CoinReferencesMatrix[x][y-2] = null;
+			CoinReferencesMatrix[x][y-3] = null;
+			lastCoin[x] = lastCoin[x] - 4;
+			
+			recall = true;
+		} else if(lastCoin[x] >= 1 && CoinReferencesMatrix[x][y].getType() == Constants.Coin50 && CoinReferencesMatrix[x][y-1].getType() == Constants.Coin50  ) {
+			/** borramos las monedas */
+			CoinReferencesMatrix[x][y].setAlpha(0.0f);
+			CoinReferencesMatrix[x][y-1].setAlpha(0.0f);
+			
+			/** creamos la nueva moneda */
+			CoinReferencesMatrix[x][y-1] = new Coin(x, y-1, 48, 48, resourcesManager.game_coin100_region, vbom, Constants.Coin100);
 			attachChild(CoinReferencesMatrix[x][y-1]);
 			
 			/** actualizamos las matrices */

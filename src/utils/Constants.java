@@ -18,6 +18,8 @@ public interface Constants {
 	public static final int Coin1 = 1;
 	public static final int Coin5 = 5;
 	public static final int Coin10 = 10;
+	public static final int Coin50 = 50;
+	public static final int Coin100 = 100;
 	
 
 	// ===========================================================
