@@ -22,7 +22,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 
 import entity.Canon;
-import entity.CellEntity;
 import entity.Coin;
 
 public class GameScene extends BaseScene implements OnClickListener{
@@ -48,6 +47,8 @@ public class GameScene extends BaseScene implements OnClickListener{
 	private int mCoinNumber;
 	//private Coin lastAlphaCoin;
 	//private CellEntity mPointer;
+	private int mTopDelimiter;
+	public int mOffset;
 	
 	
 	@Override
@@ -55,6 +56,8 @@ public class GameScene extends BaseScene implements OnClickListener{
 		
 		mCoinNumber = 0;
 		lastType = 0;
+		mTopDelimiter = 0;
+		mOffset = 0;
 		createBackground();
 		createHud();
 		initializeReferencesMatrix();
@@ -62,6 +65,17 @@ public class GameScene extends BaseScene implements OnClickListener{
 		createCanon();
 		createCoins();
 		createWalls();
+		
+		registerUpdateHandler(new TimerHandler(12.0f, true, new ITimerCallback() {
+			@Override
+			public void onTimePassed(final TimerHandler pTimerHandler) {
+				DownAllCoins();	
+					
+			}
+		}));
+		
+		
+		
 		//createButtons();
 		//primera moneda donde aparece el cañon
 		
@@ -167,13 +181,15 @@ public class GameScene extends BaseScene implements OnClickListener{
 		mHud = new HUD();
 		camera.setHUD(mHud);
 		
+		
 		//aÃ±adir texto etc
+		/*
 		CellEntity square = new CellEntity(1,14,48,48,resourcesManager.game_hud_square_region,vbom) {};
 		this.attachChild(square);
 		
 		mCoinNumberText = new Text(60, 630, resourcesManager.mFont, "0", "XXX".length() , vbom);
 		mHud.attachChild(this.mCoinNumberText);
-		
+		*/
 		
 		
 	}
@@ -237,7 +253,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 		int X = (int) (mCanon.getX() / 46);
     	int Y = lastCoin[X];
     	
-    	if(Y >= 0)
+    	if(Y >= mTopDelimiter)
     	{
 	    	Coin last = CoinReferencesMatrix[X][Y];
 	    	
@@ -251,16 +267,18 @@ public class GameScene extends BaseScene implements OnClickListener{
 			    	{
 				    	last = CoinReferencesMatrix[X][Y];
 				    	last.goDown();
+				    	//CoinReferencesMatrix[X][Y] = null;
 					    Y--;
 					    lastCoin[X] = Y;
 	
 				    	mCoinNumber++;
-				    	mCoinNumberText.setText("" + mCoinNumber);
-			    	} while(Y>=0 && mCoinNumber < Constants.MAX_COINS && last.getType() == CoinReferencesMatrix[X][Y].getType() );
+				    	//mCoinNumberText.setText("" + mCoinNumber);
+			    	} while(Y>=mTopDelimiter && mCoinNumber < Constants.MAX_COINS && last.getType() == CoinReferencesMatrix[X][Y].getType() );
 		    	}
 	    	}
 	    	
 	    	/** cambiamos el icono del tipo picked*/
+	    	/*
 	    	switch (lastType) {
 			case Constants.Coin1:
 				attachChild(new CellEntity(1,14,48,48,resourcesManager.game_coin1_region,vbom) {});
@@ -279,7 +297,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 				break;
 			default:
 				break;
-			}
+			}*/
     	}
     	
 	}
@@ -323,15 +341,15 @@ public class GameScene extends BaseScene implements OnClickListener{
 			    Coin auxCoin = new Coin(x, y-1, 48, 48, CoinTexture, vbom, lastType);
 				this.attachChild(auxCoin);
 				
-				/** movemos la moneda hasta la ultima posicion en Y */
-				auxCoin.goUp(lastCoin[x]);
+				/** movemos la moneda hasta la ultima posicion en Y, teniendo en cuenta si hemos bajado el delimitador*/
+				auxCoin.goUp(lastCoin[x] + mTopDelimiter);
 				/** actualizamos la matriz de monedas */
 				lastCoin[x] = lastCoin[x]+1;
 				CoinReferencesMatrix[x][lastCoin[x]] = auxCoin;
 			}
 			
 			mCoinNumber = 0;
-			mCoinNumberText.setText("" + mCoinNumber);
+			//mCoinNumberText.setText("" + mCoinNumber);
 			lastType = 0;
 		
 			/** miramos si hay algun combo en la columna */
@@ -436,9 +454,16 @@ public class GameScene extends BaseScene implements OnClickListener{
 					checkCombos(x);					
 				}
 			}));
-		}
-		
-		
+		}	
+	}
+	
+	
+	/** bajamos todas las monedas, actualizamos posicion y bajamos el delimitador */
+	public void DownAllCoins()
+	{
+		mOffset++;	
+		camera.setCenter(240, 400 - mOffset*48);
+		mCanon.goOneUp(mOffset);
 	}
 	
 }

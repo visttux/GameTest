@@ -64,5 +64,12 @@ public class Canon extends CellEntity implements IAccelerationListener{
 		Vector2Pool.recycle(velocity);
 		
 	}
+	
+	public void goOneUp(int cells)
+	{
+		Vector2 aux = mCanonBody.getPosition();
+		mCanonBody.setTransform(aux.x, aux.y - 1.50f, 0);
+				
+	}
 
 }
