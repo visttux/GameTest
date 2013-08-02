@@ -42,6 +42,7 @@ public class ResourcesManager
 	private BitmapTextureAtlas gameCanonTextureAtlas;
 	private BitmapTextureAtlas gameCoinsTextureAtlas;
 	private BitmapTextureAtlas gameButtonsTextureAtlas;
+	private BitmapTextureAtlas gameWallsTextureAtlas;
 	private BuildableBitmapTextureAtlas menuTextureAtlas;
 	
 	
@@ -62,6 +63,8 @@ public class ResourcesManager
 	public ITextureRegion game_pointer_region;
 	public ITextureRegion game_triangle_button_region;
 	public ITextureRegion game_hud_square_region;
+	public ITextureRegion game_wood_brick_region;
+	public ITextureRegion game_stone_wall_region;
 	
 	public Font mFont;
 	
@@ -132,9 +135,10 @@ public class ResourcesManager
     	game_background_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameBackgroundTexturaAtlas, activity, "background/background1.png", 0, 0);
     	gameBackgroundTexturaAtlas.load();
     	
-    	gameCoinsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 288, 288, TextureOptions.BILINEAR);
+    	gameCoinsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 336, 336, TextureOptions.BILINEAR);
     	gameCanonTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 48, 800, TextureOptions.BILINEAR);
     	gameButtonsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 64, 64, TextureOptions.BILINEAR);
+    	gameWallsTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 480, 48, TextureOptions.BILINEAR);
     	
     	game_coin1_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin1.png", 0, 0);
     	game_coin5_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin5.png", 48, 48);
@@ -142,14 +146,18 @@ public class ResourcesManager
     	game_coin50_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin50.png", 144, 144);
     	game_coin100_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "coins/coin100.png", 192, 192);
     	game_hud_square_region =  BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "hud_square_48px.png", 240, 240);
+    	game_wood_brick_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCoinsTextureAtlas, activity, "walls/wood_brick.png", 288, 288);
     	
     	
-    	game_canon_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCanonTextureAtlas, activity, "canon3.png", 0, 0);
+    	game_canon_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameCanonTextureAtlas, activity, "canon.png", 0, 0);
     	game_triangle_button_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameButtonsTextureAtlas, activity, "triangle_button_64px.png", 0, 0);
+    	game_stone_wall_region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameWallsTextureAtlas, activity, "walls/stone_wall.png", 0, 0);
+    	
     	
     	gameCoinsTextureAtlas.load();
     	gameCanonTextureAtlas.load();
     	gameButtonsTextureAtlas.load();
+    	gameWallsTextureAtlas.load();
     	
     }
     

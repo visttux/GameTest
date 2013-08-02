@@ -21,6 +21,8 @@ public interface Constants {
 	public static final int Coin50 = 50;
 	public static final int Coin100 = 100;
 	
+	public static final float TIME_GO_DOWN = 10;
+	
 
 	// ===========================================================
 	// Methods
