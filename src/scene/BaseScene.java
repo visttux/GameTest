@@ -28,7 +28,6 @@ public abstract class BaseScene extends Scene
     //---------------------------------------------
     // CONSTRUCTOR
     //---------------------------------------------
-    
     public BaseScene()
     {
         this.resourcesManager = ResourcesManager.getInstance();

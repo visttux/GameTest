@@ -155,7 +155,8 @@ public class TestGameActivity extends BaseGameActivity {
 			@Override
 			public void onTimePassed(TimerHandler pTimerHandler) {
 				mEngine.unregisterUpdateHandler(pTimerHandler);
-				SceneManager.getInstance().createMenuScene();
+				//TODO elegir menu+levels o solo levels
+				SceneManager.getInstance().createLevelsScene();
 			}
 		}));
 		/** Saltar al ciclo de la activity de nuevo*/

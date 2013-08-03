@@ -17,6 +17,7 @@ public class SceneManager
     private BaseScene mMenuScene;
     public BaseScene mGameScene;
     private BaseScene mLoadingScene;
+    private BaseScene mLevelsScene;
     
     //---------------------------------------------
     // VARIABLES
@@ -36,6 +37,7 @@ public class SceneManager
         SCENE_MENU,
         SCENE_GAME,
         SCENE_LOADING,
+        SCENE_LEVELS
     }
     
     //---------------------------------------------
@@ -65,6 +67,8 @@ public class SceneManager
             case SCENE_LOADING:
                 setScene(mLoadingScene);
                 break;
+            case SCENE_LEVELS:
+            	setScene(mLevelsScene);
             default:
                 break;
         }
@@ -117,17 +121,45 @@ public class SceneManager
         disposeSplashScene();
     }
     
+    public void createLevelsScene()
+    {
+    	//TODO aqui habria que cargar los sprites del menu de niveles
+    	ResourcesManager.getInstance().loadGameResources();
+    	mLevelsScene = new LevelMenuScene();
+    	setScene(mLevelsScene);
+    	disposeSplashScene();
+    	
+    }
+    
+    public void loadLevelsScene()
+    {
+    	mGameScene.disposeScene();
+    	setScene(mLevelsScene);
+    }
+    
     /** si ya la hemos creado */
     public void loadMenuScene()
     {
     	mGameScene.disposeScene();
-    	setScene(mMenuScene);    	
+    	setScene(mMenuScene);
     }
 
-    public void createGameScene(final Engine mEngine)
+    public void createGameScene(final Engine mEngine, int level)
     {
         ResourcesManager.getInstance().loadGameResources();
         mGameScene = new GameScene();
+        switch (level) 
+		{
+		case 1:
+			((GameScene) mGameScene).createCoins();
+			break;
+		case 2:
+			((GameScene) mGameScene).createCoins2();
+			break;
+		default:
+			break;
+		}
+   
         setScene(mGameScene);
         mGameScene.activity.onResumeGame();
     }

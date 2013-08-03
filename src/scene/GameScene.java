@@ -52,6 +52,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 	public int mOffset;
 	
 	
+	
 	@Override
 	public void createScene() {	
 		
@@ -64,22 +65,12 @@ public class GameScene extends BaseScene implements OnClickListener{
 		initializeReferencesMatrix();
 		mPhysicsWorld =  new FixedStepPhysicsWorld(30, new Vector2(0,0), false, 8, 1);
 		createCanon();
-		createCoins();
-		createWalls();
-		
-		registerUpdateHandler(new TimerHandler(Constants.TIME_GO_DOWN, true, new ITimerCallback() {
-			@Override
-			public void onTimePassed(final TimerHandler pTimerHandler) {
-				DownAllCoins();	
-					
-			}
-		}));
-		
+		createWalls();		
 
 		registerUpdateHandler(this.mPhysicsWorld);
 		
 		//createButtons();
-		//primera moneda donde aparece el cañon
+		//primera moneda donde aparece el caï¿½on
 		
 		//lastAlphaCoin = CoinReferencesMatrix[5][4];
 		/*registerUpdateHandler(new TimerHandler(0.1f, true, new ITimerCallback() {
@@ -94,13 +85,14 @@ public class GameScene extends BaseScene implements OnClickListener{
 		
 		
 	}
+	
 
 	private void initializeReferencesMatrix() {
 		CoinReferencesMatrix = new Coin[Constants.CELLS_HORIZONTAL][Constants.CELLS_VERTICAL];
 	}
 
 	/** Ahora a manubrio pero habra que parsearlo de un XML */
-	private void createCoins() {
+	public void createCoins2() {
 				
 		for(int i=0; i<5; i++) 
 		{
@@ -140,6 +132,63 @@ public class GameScene extends BaseScene implements OnClickListener{
 			lastCoin[i] = 4;
 		lastCoin[5] = 5;
 		
+		registerUpdateHandler(new TimerHandler(Constants.TIME_GO_DOWN_LOW, true, new ITimerCallback() {
+			@Override
+			public void onTimePassed(final TimerHandler pTimerHandler) {
+				DownAllCoins();	
+					
+			}
+		}));
+	}
+	
+	public void createCoins()
+	{
+		/** monedas de 5 */
+		CoinReferencesMatrix[1][0] = new Coin(1, 0, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+		CoinReferencesMatrix[1][2] = new Coin(1, 2, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+		CoinReferencesMatrix[3][0] = new Coin(3, 0, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+		CoinReferencesMatrix[3][2] = new Coin(3, 2, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+		CoinReferencesMatrix[5][0] = new Coin(5, 0, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5); 
+		CoinReferencesMatrix[5][2] = new Coin(5, 2, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+		CoinReferencesMatrix[7][0] = new Coin(7, 0, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+		CoinReferencesMatrix[7][2] = new Coin(7, 2, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+		CoinReferencesMatrix[9][0] = new Coin(9, 0, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+		CoinReferencesMatrix[9][2] = new Coin(9, 2, 48, 48, resourcesManager.game_coin5_region, vbom, Constants.Coin5);
+	
+		/** monedas de 10*/
+		CoinReferencesMatrix[1][1] = new Coin(1, 1, 48, 48, resourcesManager.game_coin10_region, vbom, Constants.Coin10);
+		CoinReferencesMatrix[3][1] = new Coin(3, 1, 48, 48, resourcesManager.game_coin10_region, vbom, Constants.Coin10);
+		CoinReferencesMatrix[5][1] = new Coin(5, 1, 48, 48, resourcesManager.game_coin10_region, vbom, Constants.Coin10); 
+		CoinReferencesMatrix[7][1] = new Coin(7, 1, 48, 48, resourcesManager.game_coin10_region, vbom, Constants.Coin10);
+		CoinReferencesMatrix[9][1] = new Coin(9, 1, 48, 48, resourcesManager.game_coin10_region, vbom, Constants.Coin10);
+		 
+		for(int i=0; i<Constants.CELLS_HORIZONTAL;i++)
+			for(int j=0; j<Constants.CELLS_VERTICAL;j++)
+			{
+				if(CoinReferencesMatrix[i][j] != null)
+					this.attachChild(CoinReferencesMatrix[i][j]);
+			}
+		
+		lastCoin = new int[Constants.CELLS_HORIZONTAL];
+		
+		lastCoin[0] = -1;
+		lastCoin[1] = 2;
+		lastCoin[2] = -1;
+		lastCoin[3] = 2;
+		lastCoin[4] = -1;
+		lastCoin[5] = 2;
+		lastCoin[6] = -1;
+		lastCoin[7] = 2;
+		lastCoin[8] = -1;
+		lastCoin[9] = 2;
+		
+		registerUpdateHandler(new TimerHandler(Constants.TIME_GO_DOWN_FAST, true, new ITimerCallback() {
+			@Override
+			public void onTimePassed(final TimerHandler pTimerHandler) {
+				DownAllCoins();	
+					
+			}
+		}));
 	}
 	
 	private void createCanon()
@@ -147,14 +196,14 @@ public class GameScene extends BaseScene implements OnClickListener{
 		mCanon = new Canon(5, 0, 48, 800, resourcesManager.game_canon_region, vbom, mPhysicsWorld);
 		attachChild(mCanon);
 		activity.setCanon(mCanon);
-		
 	}
 		
 	
 	@Override
 	public void onBackKeyPressed() {
 		/** Aqui en realidad sacaremos un pop-up (como un pause) y desde ahi podras volver al menu */
-		SceneManager.getInstance().loadMenuScene();
+		//SceneManager.getInstance().loadMenuScene();
+		SceneManager.getInstance().loadLevelsScene();
 		engine.start();
 	}
 
@@ -292,7 +341,7 @@ public class GameScene extends BaseScene implements OnClickListener{
 		int X = (int) (mCanon.getX() / 46);
     	int Y = lastCoin[X];
     	
-    	if(Y >= mTopDelimiter)
+    	if(Y >= 0)
     	{
 	    	Coin last = CoinReferencesMatrix[X][Y];
 	    	
